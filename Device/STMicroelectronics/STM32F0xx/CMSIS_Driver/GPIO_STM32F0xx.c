@@ -2,7 +2,7 @@
  * Copyright (C) 2017 Sergey Koshkin <koshkin.sergey@gmail.com>
  * All rights reserved
  *
- * File Name  : GPIO_ADuCM320.c
+ * File Name  : GPIO_STM32F0xx.c
  * Description: GPIO Driver for ST STM32F0xx
  */
 
@@ -42,8 +42,13 @@
  *  function implementations (scope: module-local)
  ******************************************************************************/
 
+/**
+ * @brief       Get a pointer to the GPIO peripherals
+ * @param[in]   port    GPIO port (A..F)
+ * @return      Returns a pointer to the GPIO peripherals
+ */
 static
-GPIO_TypeDef* GetPort(GPIO_PORT_t port)
+GPIO_TypeDef* get_gpio(GPIO_PORT_t port)
 {
   GPIO_TypeDef *gpio = NULL;
 
@@ -181,7 +186,7 @@ bool GPIO_GetPortClockState(GPIO_PORT_t port)
  */
 void GPIO_PinToggle(GPIO_PORT_t port, GPIO_PIN_t pin)
 {
-  GPIO_TypeDef *gpio = GetPort(port);
+  GPIO_TypeDef *gpio = get_gpio(port);
 
   gpio->ODR ^= (1UL << pin);
 }
@@ -195,7 +200,7 @@ void GPIO_PinToggle(GPIO_PORT_t port, GPIO_PIN_t pin)
  */
 void GPIO_PinWrite(GPIO_PORT_t port, GPIO_PIN_t pin, GPIO_PIN_OUT_t value)
 {
-  GPIO_TypeDef *gpio = GetPort(port);
+  GPIO_TypeDef *gpio = get_gpio(port);
   uint32_t shift = 0;
 
   if (value == GPIO_PIN_OUT_LOW)
@@ -213,7 +218,7 @@ void GPIO_PinWrite(GPIO_PORT_t port, GPIO_PIN_t pin, GPIO_PIN_OUT_t value)
  */
 uint32_t GPIO_PinRead(GPIO_PORT_t port, GPIO_PIN_t pin)
 {
-  GPIO_TypeDef *gpio = GetPort(port);
+  GPIO_TypeDef *gpio = get_gpio(port);
 
   return ((gpio->IDR >> pin) & 1UL);
 }
@@ -226,7 +231,7 @@ uint32_t GPIO_PinRead(GPIO_PORT_t port, GPIO_PIN_t pin)
  */
 void GPIO_PortWrite(GPIO_PORT_t port, uint16_t value)
 {
-  GPIO_TypeDef *gpio = GetPort(port);
+  GPIO_TypeDef *gpio = get_gpio(port);
 
   gpio->ODR = (uint32_t)value;
 }
@@ -239,7 +244,7 @@ void GPIO_PortWrite(GPIO_PORT_t port, uint16_t value)
  */
 uint16_t GPIO_PortRead(GPIO_PORT_t port)
 {
-  GPIO_TypeDef *gpio = GetPort(port);
+  GPIO_TypeDef *gpio = get_gpio(port);
 
   return (uint16_t)gpio->IDR;
 }
@@ -261,7 +266,7 @@ void GPIO_PinConfig(GPIO_PORT_t port, GPIO_PIN_t pin, const GPIO_PIN_CFG_t *cfg)
   if (cfg == NULL)
     return;
 
-  gpio = GetPort(port);
+  gpio = get_gpio(port);
   shift = (pin << 1);
 
   moder = (gpio->MODER & ~(3UL << shift));
