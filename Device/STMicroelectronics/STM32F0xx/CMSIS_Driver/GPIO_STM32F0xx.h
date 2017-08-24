@@ -101,7 +101,6 @@ typedef struct _GPIO_PIN_CFG {
   GPIO_MODE_t mode;
   GPIO_PULL_t pull_mode;
   GPIO_SPEED_t speed;
-  GPIO_PIN_FUNC_t func;
 } GPIO_PIN_CFG_t;
 
 typedef enum {
@@ -194,6 +193,16 @@ uint16_t GPIO_PortRead(GPIO_PORT_t port);
  */
 extern
 void GPIO_PinConfig(GPIO_PORT_t port, GPIO_PIN_t pin, const GPIO_PIN_CFG_t *cfg);
+
+/**
+ * @fn          void GPIO_AFConfig(GPIO_PORT_t port, GPIO_PIN_t pin, GPIO_PIN_FUNC_t af_num)
+ * @brief       Configure alternate functions
+ * @param[in]   port    GPIO port (A..F)
+ * @param[in]   pin     Port pin number (0..15)
+ * @param[in]   af_num  Alternate function number
+ */
+extern
+void GPIO_AFConfig(GPIO_PORT_t port, GPIO_PIN_t pin, GPIO_PIN_FUNC_t af_num);
 
 #endif /* GPIO_STM32F0XX_H_ */
 

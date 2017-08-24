@@ -276,15 +276,24 @@ void GPIO_PinConfig(GPIO_PORT_t port, GPIO_PIN_t pin, const GPIO_PIN_CFG_t *cfg)
   gpio->MODER = (moder | ((cfg->mode & 3UL) << shift));
   gpio->OTYPER = (otyper | (((cfg->mode >> 8) & 1UL) << pin));
   gpio->OSPEEDR = (ospeedr | ((cfg->speed & 3UL) << shift));
+}
 
-  if ((cfg->mode & 3UL) == 2UL) {
-    uint32_t afr;
-    volatile uint32_t *pafr = &gpio->AFR[pin >> 3];
+/**
+ * @fn          void GPIO_AFConfig(GPIO_PORT_t port, GPIO_PIN_t pin, GPIO_PIN_FUNC_t af_num)
+ * @brief       Configure alternate functions
+ * @param[in]   port    GPIO port (A..F)
+ * @param[in]   pin     Port pin number (0..15)
+ * @param[in]   af_num  Alternate function number
+ */
+void GPIO_AFConfig(GPIO_PORT_t port, GPIO_PIN_t pin, GPIO_PIN_FUNC_t af_num)
+{
+  uint32_t afr;
+  uint32_t shift = (((uint32_t)(pin & 7UL)) << 2);
+  GPIO_TypeDef *gpio = get_gpio(port);
+  volatile uint32_t *pafr = &gpio->AFR[pin >> 3];
 
-    shift = (((uint32_t)(pin & 7UL)) << 2);
-    afr = (*pafr & ~(0xF << shift));
-    *pafr = (afr | ((uint32_t)cfg->func << shift));
-  }
+  afr = (*pafr & ~(0xF << shift));
+  *pafr = (afr | ((uint32_t)af_num << shift));
 }
 
 /* ----------------------------- End of file ---------------------------------*/
