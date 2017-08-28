@@ -1,9 +1,9 @@
 ;******************** (C) COPYRIGHT 2016 STMicroelectronics ********************
-;* File Name          : startup_stm32f070x6.s
+;* File Name          : startup_stm32f058xx.s
 ;* Author             : MCD Application Team
 ;* Version            : V2.2.3
 ;* Date               : 29-January-2016
-;* Description        : STM32F070x4/STM32F070x6 devices vector table for MDK-ARM toolchain.
+;* Description        : STM32F058xx devices vector table for MDK-ARM toolchain.
 ;*                      This module performs:
 ;*                      - Set the initial SP
 ;*                      - Set the initial PC == Reset_Handler
@@ -99,30 +99,29 @@ __Vectors       DCD     __initial_sp                   ; Top of Stack
                 DCD     EXTI0_1_IRQHandler             ; EXTI Line 0 and 1
                 DCD     EXTI2_3_IRQHandler             ; EXTI Line 2 and 3
                 DCD     EXTI4_15_IRQHandler            ; EXTI Line 4 to 15
-                DCD     0                              ; Reserved
+                DCD     TSC_IRQHandler                 ; TS
                 DCD     DMA1_Channel1_IRQHandler       ; DMA1 Channel 1
                 DCD     DMA1_Channel2_3_IRQHandler     ; DMA1 Channel 2 and Channel 3
                 DCD     DMA1_Channel4_5_IRQHandler     ; DMA1 Channel 4 and Channel 5
-                DCD     ADC1_IRQHandler                ; ADC1 
+                DCD     ADC1_COMP_IRQHandler           ; ADC1, COMP1 and COMP2 
                 DCD     TIM1_BRK_UP_TRG_COM_IRQHandler ; TIM1 Break, Update, Trigger and Commutation
                 DCD     TIM1_CC_IRQHandler             ; TIM1 Capture Compare
-                DCD     0                              ; Reserved
+                DCD     TIM2_IRQHandler                ; TIM2
                 DCD     TIM3_IRQHandler                ; TIM3
-                DCD     0                              ; Reserved
+                DCD     TIM6_DAC_IRQHandler            ; TIM6 and DAC
                 DCD     0                              ; Reserved
                 DCD     TIM14_IRQHandler               ; TIM14
-                DCD     0                              ; Reserved
+                DCD     TIM15_IRQHandler               ; TIM15
                 DCD     TIM16_IRQHandler               ; TIM16
                 DCD     TIM17_IRQHandler               ; TIM17
                 DCD     I2C1_IRQHandler                ; I2C1
-                DCD     0                              ; Reserved
+                DCD     I2C2_IRQHandler                ; I2C2
                 DCD     SPI1_IRQHandler                ; SPI1
-                DCD     0                              ; Reserved
+                DCD     SPI2_IRQHandler                ; SPI2
                 DCD     USART1_IRQHandler              ; USART1
                 DCD     USART2_IRQHandler              ; USART2
                 DCD     0                              ; Reserved
-                DCD     0                              ; Reserved
-                DCD     USB_IRQHandler                 ; USB
+                DCD     CEC_IRQHandler                 ; CEC
 
 __Vectors_End
 
@@ -134,36 +133,8 @@ __Vectors_Size  EQU  __Vectors_End - __Vectors
 Reset_Handler    PROC
                  EXPORT  Reset_Handler                 [WEAK]
         IMPORT  __main
-        IMPORT  SystemInit  
-
-
-
-        LDR     R0, =__initial_sp          ; set stack pointer 
-        MSR     MSP, R0  
-
-;;Check if boot space corresponds to test memory 
-
-        LDR R0,=0x00000004
-        LDR R1, [R0]
-        LSRS R1, R1, #24
-        LDR R2,=0x1F
-        CMP R1, R2
-        
-        BNE ApplicationStart  
-     
-;; SYSCFG clock enable    
-     
-        LDR R0,=0x40021018 
-        LDR R1,=0x00000001
-        STR R1, [R0]
-        
-;; Set CFGR1 register with flash memory remap at address 0
-
-        LDR R0,=0x40010000 
-        LDR R1,=0x00000000
-        STR R1, [R0]
-ApplicationStart
-                 LDR     R0, =SystemInit
+        IMPORT  RCC_ClkInit
+                 LDR     R0, =RCC_ClkInit
                  BLX     R0
                  LDR     R0, =__main
                  BX      R0
@@ -202,21 +173,27 @@ Default_Handler PROC
                 EXPORT  EXTI0_1_IRQHandler             [WEAK]
                 EXPORT  EXTI2_3_IRQHandler             [WEAK]
                 EXPORT  EXTI4_15_IRQHandler            [WEAK]
+                EXPORT  TSC_IRQHandler                 [WEAK]
                 EXPORT  DMA1_Channel1_IRQHandler       [WEAK]
                 EXPORT  DMA1_Channel2_3_IRQHandler     [WEAK]
-                EXPORT  DMA1_Channel4_5_IRQHandler [WEAK]
-                EXPORT  ADC1_IRQHandler           [WEAK]
+                EXPORT  DMA1_Channel4_5_IRQHandler     [WEAK]
+                EXPORT  ADC1_COMP_IRQHandler           [WEAK]
                 EXPORT  TIM1_BRK_UP_TRG_COM_IRQHandler [WEAK]
                 EXPORT  TIM1_CC_IRQHandler             [WEAK]
+                EXPORT  TIM2_IRQHandler                [WEAK]
                 EXPORT  TIM3_IRQHandler                [WEAK]
+                EXPORT  TIM6_DAC_IRQHandler            [WEAK]
                 EXPORT  TIM14_IRQHandler               [WEAK]
+                EXPORT  TIM15_IRQHandler               [WEAK]
                 EXPORT  TIM16_IRQHandler               [WEAK]
                 EXPORT  TIM17_IRQHandler               [WEAK]
                 EXPORT  I2C1_IRQHandler                [WEAK]
+                EXPORT  I2C2_IRQHandler                [WEAK]
                 EXPORT  SPI1_IRQHandler                [WEAK]
+                EXPORT  SPI2_IRQHandler                [WEAK]
                 EXPORT  USART1_IRQHandler              [WEAK]
                 EXPORT  USART2_IRQHandler              [WEAK]
-                EXPORT  USB_IRQHandler                 [WEAK]
+                EXPORT  CEC_IRQHandler                 [WEAK]
 
 
 WWDG_IRQHandler
@@ -226,21 +203,27 @@ RCC_IRQHandler
 EXTI0_1_IRQHandler
 EXTI2_3_IRQHandler
 EXTI4_15_IRQHandler
+TSC_IRQHandler
 DMA1_Channel1_IRQHandler
 DMA1_Channel2_3_IRQHandler
 DMA1_Channel4_5_IRQHandler
-ADC1_IRQHandler
+ADC1_COMP_IRQHandler
 TIM1_BRK_UP_TRG_COM_IRQHandler
 TIM1_CC_IRQHandler
+TIM2_IRQHandler
 TIM3_IRQHandler
+TIM6_DAC_IRQHandler
 TIM14_IRQHandler
+TIM15_IRQHandler
 TIM16_IRQHandler
 TIM17_IRQHandler
 I2C1_IRQHandler
+I2C2_IRQHandler
 SPI1_IRQHandler
+SPI2_IRQHandler
 USART1_IRQHandler
 USART2_IRQHandler
-USB_IRQHandler
+CEC_IRQHandler
 
                 B       .
 

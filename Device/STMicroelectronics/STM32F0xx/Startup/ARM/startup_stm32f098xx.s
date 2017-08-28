@@ -1,9 +1,9 @@
 ;******************** (C) COPYRIGHT 2016 STMicroelectronics ********************
-;* File Name          : startup_stm32f072xb.s
+;* File Name          : startup_stm32f098xx.s
 ;* Author             : MCD Application Team
 ;* Version            : V2.2.3
 ;* Date               : 29-January-2016
-;* Description        : STM32F072x8/STM32F072xB devices vector table for MDK-ARM toolchain.
+;* Description        : STM32F098xx devices vector table for MDK-ARM toolchain.
 ;*                      This module performs:
 ;*                      - Set the initial SP
 ;*                      - Set the initial PC == Reset_Handler
@@ -92,7 +92,7 @@ __Vectors       DCD     __initial_sp                   ; Top of Stack
 
                 ; External Interrupts
                 DCD     WWDG_IRQHandler                ; Window Watchdog
-                DCD     PVD_VDDIO2_IRQHandler          ; PVD through EXTI Line detect
+                DCD     VDDIO2_IRQHandler              ; VDDIO2 Monitor through EXTI Line 31
                 DCD     RTC_IRQHandler                 ; RTC through EXTI Line
                 DCD     FLASH_IRQHandler               ; FLASH
                 DCD     RCC_CRS_IRQHandler             ; RCC and CRS
@@ -100,9 +100,9 @@ __Vectors       DCD     __initial_sp                   ; Top of Stack
                 DCD     EXTI2_3_IRQHandler             ; EXTI Line 2 and 3
                 DCD     EXTI4_15_IRQHandler            ; EXTI Line 4 to 15
                 DCD     TSC_IRQHandler                 ; TS
-                DCD     DMA1_Channel1_IRQHandler       ; DMA1 Channel 1
-                DCD     DMA1_Channel2_3_IRQHandler     ; DMA1 Channel 2 and Channel 3
-                DCD     DMA1_Channel4_5_6_7_IRQHandler ; DMA1 Channel 4, Channel 5, Channel 6 and Channel 7
+                DCD     DMA1_Ch1_IRQHandler            ; DMA1 Channel 1
+                DCD     DMA1_Ch2_3_DMA2_Ch1_2_IRQHandler ; DMA1 Channel 2 and 3 & DMA2 Channel 1 and 2
+                DCD     DMA1_Ch4_7_DMA2_Ch3_5_IRQHandler ; DMA1 Channel 4 to 7 & DMA2 Channel 3 to 5 
                 DCD     ADC1_COMP_IRQHandler           ; ADC1, COMP1 and COMP2 
                 DCD     TIM1_BRK_UP_TRG_COM_IRQHandler ; TIM1 Break, Update, Trigger and Commutation
                 DCD     TIM1_CC_IRQHandler             ; TIM1 Capture Compare
@@ -120,9 +120,8 @@ __Vectors       DCD     __initial_sp                   ; Top of Stack
                 DCD     SPI2_IRQHandler                ; SPI2
                 DCD     USART1_IRQHandler              ; USART1
                 DCD     USART2_IRQHandler              ; USART2
-                DCD     USART3_4_IRQHandler            ; USART3 & USART4
+                DCD     USART3_8_IRQHandler            ; USART3, USART4, USART5, USART6, USART7, USART8
                 DCD     CEC_CAN_IRQHandler             ; CEC and CAN
-                DCD     USB_IRQHandler                 ; USB
 
 __Vectors_End
 
@@ -134,8 +133,8 @@ __Vectors_Size  EQU  __Vectors_End - __Vectors
 Reset_Handler    PROC
                  EXPORT  Reset_Handler                 [WEAK]
         IMPORT  __main
-        IMPORT  SystemInit  
-                 LDR     R0, =SystemInit
+        IMPORT  RCC_ClkInit
+                 LDR     R0, =RCC_ClkInit
                  BLX     R0
                  LDR     R0, =__main
                  BX      R0
@@ -168,7 +167,7 @@ SysTick_Handler PROC
 Default_Handler PROC
 
                 EXPORT  WWDG_IRQHandler                [WEAK]
-                EXPORT  PVD_VDDIO2_IRQHandler          [WEAK]
+                EXPORT  VDDIO2_IRQHandler              [WEAK]
                 EXPORT  RTC_IRQHandler                 [WEAK]
                 EXPORT  FLASH_IRQHandler               [WEAK]
                 EXPORT  RCC_CRS_IRQHandler             [WEAK]
@@ -176,9 +175,9 @@ Default_Handler PROC
                 EXPORT  EXTI2_3_IRQHandler             [WEAK]
                 EXPORT  EXTI4_15_IRQHandler            [WEAK]
                 EXPORT  TSC_IRQHandler                 [WEAK]
-                EXPORT  DMA1_Channel1_IRQHandler       [WEAK]
-                EXPORT  DMA1_Channel2_3_IRQHandler     [WEAK]
-                EXPORT  DMA1_Channel4_5_6_7_IRQHandler [WEAK]
+                EXPORT  DMA1_Ch1_IRQHandler            [WEAK]
+                EXPORT  DMA1_Ch2_3_DMA2_Ch1_2_IRQHandler [WEAK]
+                EXPORT  DMA1_Ch4_7_DMA2_Ch3_5_IRQHandler [WEAK]
                 EXPORT  ADC1_COMP_IRQHandler           [WEAK]
                 EXPORT  TIM1_BRK_UP_TRG_COM_IRQHandler [WEAK]
                 EXPORT  TIM1_CC_IRQHandler             [WEAK]
@@ -196,13 +195,12 @@ Default_Handler PROC
                 EXPORT  SPI2_IRQHandler                [WEAK]
                 EXPORT  USART1_IRQHandler              [WEAK]
                 EXPORT  USART2_IRQHandler              [WEAK]
-                EXPORT  USART3_4_IRQHandler            [WEAK]
+                EXPORT  USART3_8_IRQHandler            [WEAK]
                 EXPORT  CEC_CAN_IRQHandler             [WEAK]
-                EXPORT  USB_IRQHandler                 [WEAK]
 
 
 WWDG_IRQHandler
-PVD_VDDIO2_IRQHandler
+VDDIO2_IRQHandler
 RTC_IRQHandler
 FLASH_IRQHandler
 RCC_CRS_IRQHandler
@@ -210,9 +208,9 @@ EXTI0_1_IRQHandler
 EXTI2_3_IRQHandler
 EXTI4_15_IRQHandler
 TSC_IRQHandler
-DMA1_Channel1_IRQHandler
-DMA1_Channel2_3_IRQHandler
-DMA1_Channel4_5_6_7_IRQHandler
+DMA1_Ch1_IRQHandler
+DMA1_Ch2_3_DMA2_Ch1_2_IRQHandler
+DMA1_Ch4_7_DMA2_Ch3_5_IRQHandler
 ADC1_COMP_IRQHandler
 TIM1_BRK_UP_TRG_COM_IRQHandler
 TIM1_CC_IRQHandler
@@ -230,9 +228,8 @@ SPI1_IRQHandler
 SPI2_IRQHandler
 USART1_IRQHandler
 USART2_IRQHandler
-USART3_4_IRQHandler
+USART3_8_IRQHandler
 CEC_CAN_IRQHandler
-USB_IRQHandler
 
                 B       .
 

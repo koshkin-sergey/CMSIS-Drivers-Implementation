@@ -1,9 +1,9 @@
 ;******************** (C) COPYRIGHT 2016 STMicroelectronics ********************
-;* File Name          : startup_stm32f070xb.s
+;* File Name          : startup_stm32f030xc.s
 ;* Author             : MCD Application Team
 ;* Version            : V2.2.3
 ;* Date               : 29-January-2016
-;* Description        : STM32F070x8/STM32F070xB devices vector table for MDK-ARM toolchain.
+;* Description        : STM32F030xc/STM32F030xb devices vector table for MDK-ARM toolchain.
 ;*                      This module performs:
 ;*                      - Set the initial SP
 ;*                      - Set the initial PC == Reset_Handler
@@ -120,10 +120,8 @@ __Vectors       DCD     __initial_sp                   ; Top of Stack
                 DCD     SPI2_IRQHandler                ; SPI2
                 DCD     USART1_IRQHandler              ; USART1
                 DCD     USART2_IRQHandler              ; USART2
-                DCD     USART3_4_IRQHandler            ; USART3 & USART4
-                DCD     0                              ; Reserved
-                DCD     USB_IRQHandler                 ; USB
-
+                DCD     USART3_6_IRQHandler            ; USART3, USART4, USART5, USART6
+                
 __Vectors_End
 
 __Vectors_Size  EQU  __Vectors_End - __Vectors
@@ -134,8 +132,8 @@ __Vectors_Size  EQU  __Vectors_End - __Vectors
 Reset_Handler    PROC
                  EXPORT  Reset_Handler                 [WEAK]
         IMPORT  __main
-        IMPORT  SystemInit  
-                 LDR     R0, =SystemInit
+        IMPORT  RCC_ClkInit
+                 LDR     R0, =RCC_ClkInit
                  BLX     R0
                  LDR     R0, =__main
                  BX      R0
@@ -193,8 +191,7 @@ Default_Handler PROC
                 EXPORT  SPI2_IRQHandler                [WEAK]
                 EXPORT  USART1_IRQHandler              [WEAK]
                 EXPORT  USART2_IRQHandler              [WEAK]
-                EXPORT  USART3_4_IRQHandler            [WEAK]
-                EXPORT  USB_IRQHandler                 [WEAK]
+                EXPORT  USART3_6_IRQHandler            [WEAK]
 
 
 WWDG_IRQHandler
@@ -223,8 +220,7 @@ SPI1_IRQHandler
 SPI2_IRQHandler
 USART1_IRQHandler
 USART2_IRQHandler
-USART3_4_IRQHandler
-USB_IRQHandler
+USART3_6_IRQHandler
 
                 B       .
 

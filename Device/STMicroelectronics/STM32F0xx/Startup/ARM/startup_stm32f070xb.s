@@ -1,9 +1,9 @@
 ;******************** (C) COPYRIGHT 2016 STMicroelectronics ********************
-;* File Name          : startup_stm32f038xx.s
+;* File Name          : startup_stm32f070xb.s
 ;* Author             : MCD Application Team
 ;* Version            : V2.2.3
 ;* Date               : 29-January-2016
-;* Description        : STM32F038xx devices vector table for MDK-ARM toolchain.
+;* Description        : STM32F070x8/STM32F070xB devices vector table for MDK-ARM toolchain.
 ;*                      This module performs:
 ;*                      - Set the initial SP
 ;*                      - Set the initial PC == Reset_Handler
@@ -106,20 +106,23 @@ __Vectors       DCD     __initial_sp                   ; Top of Stack
                 DCD     ADC1_IRQHandler                ; ADC1 
                 DCD     TIM1_BRK_UP_TRG_COM_IRQHandler ; TIM1 Break, Update, Trigger and Commutation
                 DCD     TIM1_CC_IRQHandler             ; TIM1 Capture Compare
-                DCD     TIM2_IRQHandler                ; TIM2
+                DCD     0                              ; Reserved
                 DCD     TIM3_IRQHandler                ; TIM3
-                DCD     0                              ; Reserved
-                DCD     0                              ; Reserved
+                DCD     TIM6_IRQHandler                ; TIM6
+                DCD     TIM7_IRQHandler                ; TIM7
                 DCD     TIM14_IRQHandler               ; TIM14
-                DCD     0                              ; Reserved
+                DCD     TIM15_IRQHandler               ; TIM15
                 DCD     TIM16_IRQHandler               ; TIM16
                 DCD     TIM17_IRQHandler               ; TIM17
                 DCD     I2C1_IRQHandler                ; I2C1
-                DCD     0                              ; Reserved
+                DCD     I2C2_IRQHandler                ; I2C2
                 DCD     SPI1_IRQHandler                ; SPI1
-                DCD     0                              ; Reserved
+                DCD     SPI2_IRQHandler                ; SPI2
                 DCD     USART1_IRQHandler              ; USART1
-
+                DCD     USART2_IRQHandler              ; USART2
+                DCD     USART3_4_IRQHandler            ; USART3 & USART4
+                DCD     0                              ; Reserved
+                DCD     USB_IRQHandler                 ; USB
 
 __Vectors_End
 
@@ -131,8 +134,8 @@ __Vectors_Size  EQU  __Vectors_End - __Vectors
 Reset_Handler    PROC
                  EXPORT  Reset_Handler                 [WEAK]
         IMPORT  __main
-        IMPORT  SystemInit  
-                 LDR     R0, =SystemInit
+        IMPORT  RCC_ClkInit
+                 LDR     R0, =RCC_ClkInit
                  BLX     R0
                  LDR     R0, =__main
                  BX      R0
@@ -177,14 +180,21 @@ Default_Handler PROC
                 EXPORT  ADC1_IRQHandler                [WEAK]
                 EXPORT  TIM1_BRK_UP_TRG_COM_IRQHandler [WEAK]
                 EXPORT  TIM1_CC_IRQHandler             [WEAK]
-                EXPORT  TIM2_IRQHandler                [WEAK]
                 EXPORT  TIM3_IRQHandler                [WEAK]
+                EXPORT  TIM6_IRQHandler                [WEAK]
+                EXPORT  TIM7_IRQHandler                [WEAK]
                 EXPORT  TIM14_IRQHandler               [WEAK]
+                EXPORT  TIM15_IRQHandler               [WEAK]
                 EXPORT  TIM16_IRQHandler               [WEAK]
                 EXPORT  TIM17_IRQHandler               [WEAK]
                 EXPORT  I2C1_IRQHandler                [WEAK]
+                EXPORT  I2C2_IRQHandler                [WEAK]
                 EXPORT  SPI1_IRQHandler                [WEAK]
+                EXPORT  SPI2_IRQHandler                [WEAK]
                 EXPORT  USART1_IRQHandler              [WEAK]
+                EXPORT  USART2_IRQHandler              [WEAK]
+                EXPORT  USART3_4_IRQHandler            [WEAK]
+                EXPORT  USB_IRQHandler                 [WEAK]
 
 
 WWDG_IRQHandler
@@ -197,17 +207,24 @@ EXTI4_15_IRQHandler
 DMA1_Channel1_IRQHandler
 DMA1_Channel2_3_IRQHandler
 DMA1_Channel4_5_IRQHandler
-ADC1_IRQHandler
+ADC1_IRQHandler 
 TIM1_BRK_UP_TRG_COM_IRQHandler
 TIM1_CC_IRQHandler
-TIM2_IRQHandler
 TIM3_IRQHandler
+TIM6_IRQHandler
+TIM7_IRQHandler
 TIM14_IRQHandler
+TIM15_IRQHandler
 TIM16_IRQHandler
 TIM17_IRQHandler
 I2C1_IRQHandler
+I2C2_IRQHandler
 SPI1_IRQHandler
+SPI2_IRQHandler
 USART1_IRQHandler
+USART2_IRQHandler
+USART3_4_IRQHandler
+USB_IRQHandler
 
                 B       .
 

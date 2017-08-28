@@ -65,9 +65,8 @@ GPIO_TypeDef* get_gpio(GPIO_PORT_t port)
     case GPIO_PORT_D:
       gpio = GPIOD;
       break;
-#if defined(STM32F070x6) || defined(STM32F070xB) || defined(STM32F071xB) || \
-    defined(STM32F072xB) || defined(STM32F078xx) || defined(STM32F091xC) || \
-    defined(STM32F098xx)
+#if defined(STM32F071xB) || defined(STM32F072xB) || defined(STM32F078xx) || \
+    defined(STM32F091xC) || defined(STM32F098xx)
     case GPIO_PORT_E:
       gpio = GPIOE;
       break;
@@ -93,58 +92,36 @@ GPIO_TypeDef* get_gpio(GPIO_PORT_t port)
  */
 void GPIO_PortClock(GPIO_PORT_t port, GPIO_PORT_CLK_t state)
 {
-  if (state == true) {
-    switch (port) {
-      case GPIO_PORT_A:
-        RCC->AHBENR |= RCC_AHBENR_GPIOAEN;
-        break;
-      case GPIO_PORT_B:
-        RCC->AHBENR |= RCC_AHBENR_GPIOBEN;
-        break;
-      case GPIO_PORT_C:
-        RCC->AHBENR |= RCC_AHBENR_GPIOCEN;
-        break;
-      case GPIO_PORT_D:
-        RCC->AHBENR |= RCC_AHBENR_GPIODEN;
-        break;
-#if defined(STM32F070x6) || defined(STM32F070xB) || defined(STM32F071xB) || \
-    defined(STM32F072xB) || defined(STM32F078xx) || defined(STM32F091xC) || \
-    defined(STM32F098xx)
-      case GPIO_PORT_E:
-        RCC->AHBENR |= RCC_AHBENR_GPIOEEN;
-        break;
+  uint32_t gpio_en;
+
+  switch (port) {
+  case GPIO_PORT_A:
+    gpio_en = RCC_AHBENR_GPIOAEN;
+    break;
+  case GPIO_PORT_B:
+    gpio_en = RCC_AHBENR_GPIOBEN;
+    break;
+  case GPIO_PORT_C:
+    gpio_en = RCC_AHBENR_GPIOCEN;
+    break;
+  case GPIO_PORT_D:
+    gpio_en = RCC_AHBENR_GPIODEN;
+    break;
+#if defined(STM32F071xB) || defined(STM32F072xB) || defined(STM32F078xx) || \
+    defined(STM32F091xC) || defined(STM32F098xx)
+  case GPIO_PORT_E:
+    gpio_en = RCC_AHBENR_GPIOEEN;
+    break;
 #endif
-      case GPIO_PORT_F:
-        RCC->AHBENR |= RCC_AHBENR_GPIOFEN;
-        break;
-    }
+  case GPIO_PORT_F:
+    gpio_en = RCC_AHBENR_GPIOFEN;
+    break;
   }
-  else {
-    switch (port) {
-      case GPIO_PORT_A:
-        RCC->AHBENR &= ~RCC_AHBENR_GPIOAEN;
-        break;
-      case GPIO_PORT_B:
-        RCC->AHBENR &= ~RCC_AHBENR_GPIOBEN;
-        break;
-      case GPIO_PORT_C:
-        RCC->AHBENR &= ~RCC_AHBENR_GPIOCEN;
-        break;
-      case GPIO_PORT_D:
-        RCC->AHBENR &= ~RCC_AHBENR_GPIODEN;
-        break;
-#if defined(STM32F070x6) || defined(STM32F070xB) || defined(STM32F071xB) || \
-    defined(STM32F072xB) || defined(STM32F078xx) || defined(STM32F091xC) || \
-    defined(STM32F098xx)
-      case GPIO_PORT_E:
-        RCC->AHBENR &= ~RCC_AHBENR_GPIOEEN;
-        break;
-#endif
-      case GPIO_PORT_F:
-        RCC->AHBENR &= ~RCC_AHBENR_GPIOFEN;
-        break;
-    }
-  }
+
+  if (state != GPIO_PORT_CLK_DISABLE)
+    RCC->AHBENR |= gpio_en;
+  else
+    RCC->AHBENR &= ~gpio_en;
 }
 
 /**
@@ -156,26 +133,33 @@ void GPIO_PortClock(GPIO_PORT_t port, GPIO_PORT_CLK_t state)
  */
 bool GPIO_GetPortClockState(GPIO_PORT_t port)
 {
+  uint32_t gpio_en;
+
   switch (port) {
-    case GPIO_PORT_A:
-      return ((RCC->AHBENR & RCC_AHBENR_GPIOAEN) != 0UL);
-    case GPIO_PORT_B:
-      return ((RCC->AHBENR & RCC_AHBENR_GPIOBEN) != 0UL);
-    case GPIO_PORT_C:
-      return ((RCC->AHBENR & RCC_AHBENR_GPIOCEN) != 0UL);
-    case GPIO_PORT_D:
-      return ((RCC->AHBENR & RCC_AHBENR_GPIODEN) != 0UL);
-#if defined(STM32F070x6) || defined(STM32F070xB) || defined(STM32F071xB) || \
-  defined(STM32F072xB) || defined(STM32F078xx) || defined(STM32F091xC) || \
-  defined(STM32F098xx)
-    case GPIO_PORT_E:
-      return ((RCC->AHBENR & RCC_AHBENR_GPIOEEN) != 0UL);
+  case GPIO_PORT_A:
+    gpio_en = RCC_AHBENR_GPIOAEN;
+    break;
+  case GPIO_PORT_B:
+    gpio_en = RCC_AHBENR_GPIOBEN;
+    break;
+  case GPIO_PORT_C:
+    gpio_en = RCC_AHBENR_GPIOCEN;
+    break;
+  case GPIO_PORT_D:
+    gpio_en = RCC_AHBENR_GPIODEN;
+    break;
+#if defined(STM32F071xB) || defined(STM32F072xB) || defined(STM32F078xx) || \
+    defined(STM32F091xC) || defined(STM32F098xx)
+  case GPIO_PORT_E:
+    gpio_en = RCC_AHBENR_GPIOEEN;
+    break;
 #endif
-    case GPIO_PORT_F:
-      return ((RCC->AHBENR & RCC_AHBENR_GPIOFEN) != 0UL);
-    default:
-      return false;
+  case GPIO_PORT_F:
+    gpio_en = RCC_AHBENR_GPIOFEN;
+    break;
   }
+
+  return ((RCC->AHBENR & gpio_en) != 0UL);
 }
 
 /**

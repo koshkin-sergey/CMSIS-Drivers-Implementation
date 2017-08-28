@@ -1,9 +1,9 @@
 ;******************** (C) COPYRIGHT 2016 STMicroelectronics ********************
-;* File Name          : startup_stm32f058xx.s
+;* File Name          : startup_stm32f051x8.s
 ;* Author             : MCD Application Team
 ;* Version            : V2.2.3
 ;* Date               : 29-January-2016
-;* Description        : STM32F058xx devices vector table for MDK-ARM toolchain.
+;* Description        : STM32F051x4/STM32F051x6/STM32F051x8 devices vector table for MDK-ARM toolchain.
 ;*                      This module performs:
 ;*                      - Set the initial SP
 ;*                      - Set the initial PC == Reset_Handler
@@ -92,7 +92,7 @@ __Vectors       DCD     __initial_sp                   ; Top of Stack
 
                 ; External Interrupts
                 DCD     WWDG_IRQHandler                ; Window Watchdog
-                DCD     0                              ; Reserved
+                DCD     PVD_IRQHandler                 ; PVD through EXTI Line detect
                 DCD     RTC_IRQHandler                 ; RTC through EXTI Line
                 DCD     FLASH_IRQHandler               ; FLASH
                 DCD     RCC_IRQHandler                 ; RCC
@@ -133,8 +133,8 @@ __Vectors_Size  EQU  __Vectors_End - __Vectors
 Reset_Handler    PROC
                  EXPORT  Reset_Handler                 [WEAK]
         IMPORT  __main
-        IMPORT  SystemInit  
-                 LDR     R0, =SystemInit
+        IMPORT  RCC_ClkInit
+                 LDR     R0, =RCC_ClkInit
                  BLX     R0
                  LDR     R0, =__main
                  BX      R0
@@ -167,6 +167,7 @@ SysTick_Handler PROC
 Default_Handler PROC
 
                 EXPORT  WWDG_IRQHandler                [WEAK]
+                EXPORT  PVD_IRQHandler                 [WEAK]
                 EXPORT  RTC_IRQHandler                 [WEAK]
                 EXPORT  FLASH_IRQHandler               [WEAK]
                 EXPORT  RCC_IRQHandler                 [WEAK]
@@ -197,6 +198,7 @@ Default_Handler PROC
 
 
 WWDG_IRQHandler
+PVD_IRQHandler
 RTC_IRQHandler
 FLASH_IRQHandler
 RCC_IRQHandler
