@@ -28,7 +28,7 @@
 
 // I2C1 (Inter-integrated Circuit Interface 1) [Driver_I2C1]
 // Configuration settings for Driver_I2C1 in component ::Drivers:I2C
-#define   RTE_I2C1                      1
+#define   RTE_I2C1                      0
 
 // I2C1_SCL Pin <0=>PB6 <1=>PB8
 #define   RTE_I2C1_SCL_PORT_ID          0
@@ -59,7 +59,7 @@
 
 // I2C2 (Inter-integrated Circuit Interface 2) [Driver_I2C2]
 // Configuration settings for Driver_I2C2 in component ::Drivers:I2C
-#define   RTE_I2C2                      1
+#define   RTE_I2C2                      0
 
 // I2C2_SCL Pin <0=>PB10 <1=>PF6
 #define   RTE_I2C2_SCL_PORT_ID          0
