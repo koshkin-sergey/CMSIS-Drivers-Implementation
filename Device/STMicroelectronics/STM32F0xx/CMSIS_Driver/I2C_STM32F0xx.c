@@ -225,6 +225,8 @@ static
 int32_t I2Cx_PowerControl(ARM_POWER_STATE state, I2C_RESOURCES *i2c)
 {
   uint32_t cr1;
+  I2C_INFO *info = i2c->info;
+  I2C_TypeDef *reg = i2c->reg;
 
   switch (state) {
     case ARM_POWER_OFF:
@@ -232,7 +234,7 @@ int32_t I2Cx_PowerControl(ARM_POWER_STATE state, I2C_RESOURCES *i2c)
       RCC->APB1ENR |= i2c->rcc_mask;
 
       /* Disable I2C peripheral */
-      i2c->reg->CR1 = 0;
+      reg->CR1 = 0;
 
       /* Disable I2C IRQ */
       NVIC_DisableIRQ(i2c->irq_num);
@@ -240,21 +242,21 @@ int32_t I2Cx_PowerControl(ARM_POWER_STATE state, I2C_RESOURCES *i2c)
       /* Disable peripheral clock */
       RCC->APB1ENR &= ~i2c->rcc_mask;
 
-      i2c->info->status.busy             = 0U;
-      i2c->info->status.mode             = 0U;
-      i2c->info->status.direction        = 0U;
-      i2c->info->status.general_call     = 0U;
-      i2c->info->status.arbitration_lost = 0U;
-      i2c->info->status.bus_error        = 0U;
+      info->status.busy             = 0U;
+      info->status.mode             = 0U;
+      info->status.direction        = 0U;
+      info->status.general_call     = 0U;
+      info->status.arbitration_lost = 0U;
+      info->status.bus_error        = 0U;
 
-      i2c->info->flags &= ~I2C_FLAG_POWER;
+      info->flags &= ~I2C_FLAG_POWER;
       break;
 
     case ARM_POWER_FULL:
-      if ((i2c->info->flags & I2C_FLAG_INIT) == 0U)
+      if ((info->flags & I2C_FLAG_INIT) == 0U)
         return ARM_DRIVER_ERROR;
 
-      if ((i2c->info->flags & I2C_FLAG_POWER) != 0U)
+      if ((info->flags & I2C_FLAG_POWER) != 0U)
         return ARM_DRIVER_OK;
 
       /* Enable I2C clock */
@@ -289,10 +291,10 @@ int32_t I2Cx_PowerControl(ARM_POWER_STATE state, I2C_RESOURCES *i2c)
         cr1 |= I2C_CR1_TXDMAEN;
 
       /* Apply setup and enable peripheral */
-      i2c->reg->CR1 = cr1 | I2C_CR1_PE;
+      reg->CR1 = cr1 | I2C_CR1_PE;
 
       /* Ready for operation */
-      i2c->info->flags |= I2C_FLAG_POWER;
+      info->flags |= I2C_FLAG_POWER;
       break;
 
     default:
@@ -312,7 +314,10 @@ int32_t I2Cx_PowerControl(ARM_POWER_STATE state, I2C_RESOURCES *i2c)
 static
 int32_t I2Cx_Control(uint32_t control, uint32_t arg, I2C_RESOURCES *i2c)
 {
-  if ((i2c->info->flags & I2C_FLAG_POWER) == 0U) {
+  I2C_INFO *info = i2c->info;
+  I2C_TypeDef *reg = i2c->reg;
+
+  if ((info->flags & I2C_FLAG_POWER) == 0U) {
     /* I2C not powered */
     return ARM_DRIVER_ERROR;
   }
@@ -321,17 +326,17 @@ int32_t I2Cx_Control(uint32_t control, uint32_t arg, I2C_RESOURCES *i2c)
     case ARM_I2C_OWN_ADDRESS:
       if (arg == 0) {
         /* Disable slave */
-        i2c->reg->OAR1 = 0;
+        reg->OAR1 = 0;
       }
       else {
         uint32_t val;
 
         if (arg & ARM_I2C_ADDRESS_GC) {
           /* Enable general call */
-          i2c->reg->CR1 |=  I2C_CR1_GCEN;
+          reg->CR1 |=  I2C_CR1_GCEN;
         } else {
           /* Disable general call */
-          i2c->reg->CR1 &= ~I2C_CR1_GCEN;
+          reg->CR1 &= ~I2C_CR1_GCEN;
         }
 
         if (arg & ARM_I2C_ADDRESS_10BIT) {
@@ -340,7 +345,7 @@ int32_t I2Cx_Control(uint32_t control, uint32_t arg, I2C_RESOURCES *i2c)
           val = (arg & 0x7F) << 1;
         }
 
-        i2c->reg->OAR1 = val | I2C_OAR1_OA1EN;
+        reg->OAR1 = val | I2C_OAR1_OA1EN;
       }
       break;
 
@@ -366,12 +371,12 @@ int32_t I2Cx_Control(uint32_t control, uint32_t arg, I2C_RESOURCES *i2c)
         return ARM_DRIVER_ERROR_UNSUPPORTED;
       }
 
-      i2c->reg->CR1 &= ~I2C_CR1_PE;
-      i2c->reg->TIMINGR = timing;
-      i2c->reg->CR1 |= I2C_CR1_PE;
+      reg->CR1 &= ~I2C_CR1_PE;
+      reg->TIMINGR = timing;
+      reg->CR1 |= I2C_CR1_PE;
 
       /* Master configured, clock set */
-      i2c->info->flags |= I2C_FLAG_SETUP;
+      info->flags |= I2C_FLAG_SETUP;
     }
     break;
 
@@ -439,7 +444,7 @@ int32_t I2Cx_MasterTransmit(uint32_t addr, const uint8_t *data, uint32_t num,
   info->status.arbitration_lost = 0U;
 
   info->xfer.num  = num;
-  info->xfer.cnt  = 0U;
+  info->xfer.cnt  = 0;
   info->xfer.data = (uint8_t *)data;
   info->xfer.ctrl = 0U;
 
@@ -528,7 +533,7 @@ int32_t I2Cx_MasterReceive(uint32_t addr, uint8_t *data, uint32_t num,
   info->status.arbitration_lost = 0U;
 
   info->xfer.num  = num;
-  info->xfer.cnt  = 0U;
+  info->xfer.cnt  = 0;
   info->xfer.data = (uint8_t *)data;
   info->xfer.ctrl = 0U;
 
@@ -688,17 +693,17 @@ static
 void I2Cx_IRQHandler(I2C_RESOURCES *i2c)
 {
   I2C_TRANSFER_INFO *xfer = &i2c->info->xfer;
-  I2C_TypeDef *i2c_reg = i2c->reg;
-  uint32_t isr = i2c_reg->ISR;
+  I2C_TypeDef *reg = i2c->reg;
+  uint32_t isr = reg->ISR;
 
   if (isr & I2C_ISR_RXNE) {
     /* Receive data register not empty */
-    xfer->data[xfer->cnt++] = i2c_reg->RXDR;
+    xfer->data[xfer->cnt++] = reg->RXDR;
     return;
   }
   else if (isr & I2C_ISR_TXIS) {
     /* Transmit data register empty */
-    i2c_reg->TXDR = xfer->data[xfer->cnt++];
+    reg->TXDR = xfer->data[xfer->cnt++];
     return;
   }
 
@@ -712,18 +717,18 @@ void I2Cx_IRQHandler(I2C_RESOURCES *i2c)
 
       if (xfer->ctrl & XFER_CTRL_RESTART) {
         /* Wait for pending transfer */
-        i2c_reg->CR1 &= ~I2C_CR1_TCIE;
+        reg->CR1 &= ~I2C_CR1_TCIE;
 
         event = ARM_I2C_EVENT_TRANSFER_DONE;
       }
       else {
         /* Send stop */
-        i2c_reg->CR2 |= I2C_CR2_STOP;
+        reg->CR2 |= I2C_CR2_STOP;
       }
     }
     else {  // if (isr & I2C_ISR_TCR)
       /* Transfer Complete Reload */
-      uint32_t cr = i2c_reg->CR2;
+      uint32_t cr = reg->CR2;
 
       cr &= ~(I2C_CR2_RELOAD | I2C_CR2_NBYTES);
 
@@ -739,7 +744,7 @@ void I2Cx_IRQHandler(I2C_RESOURCES *i2c)
         cr |= I2C_CR2_RELOAD;
       }
 
-      i2c_reg->CR2 = (cnt << 16) | cr;
+      reg->CR2 = (cnt << 16) | cr;
     }
   }
   else if (isr & (I2C_ISR_STOPF | I2C_ISR_NACKF | I2C_ISR_ADDR | I2C_ISR_ARLO | I2C_ISR_BERR)) {
@@ -813,8 +818,18 @@ void I2Cx_IRQHandler(I2C_RESOURCES *i2c)
 
       /* Master sends STOP after slave NACK */
       /* Slave already released the lines   */
-      if (info->status.mode && (xfer->cnt == 0U)) {
+      if (info->status.mode) {
+        if (xfer->cnt == 0) {
           xfer->ctrl |= XFER_CTRL_ADDR_NACK;
+        }
+        else {
+          xfer->cnt--;
+
+          if ((isr & I2C_ISR_TXE) == 0U) {
+            reg->ISR = I2C_ISR_TXE;
+            xfer->cnt--;
+          }
+        }
       }
     }
     else if (isr & I2C_ISR_ARLO) {
@@ -849,7 +864,7 @@ void I2Cx_IRQHandler(I2C_RESOURCES *i2c)
     }
 
     /* Clear status flags */
-    i2c_reg->ICR = icr;
+    reg->ICR = icr;
   }
 
   /* Send events */
