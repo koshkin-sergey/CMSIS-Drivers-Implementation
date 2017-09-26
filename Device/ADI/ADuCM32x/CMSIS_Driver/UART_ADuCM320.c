@@ -10,7 +10,6 @@
  *  includes
  ******************************************************************************/
 
-#include "RTE_Device.h"
 #include "CLK_ADuCM320.h"
 #include "UART_ADuCM320.h"
 
@@ -42,14 +41,14 @@ static const ARM_DRIVER_VERSION DriverVersion = {
  *  global variable definitions (scope: module-local)
  ******************************************************************************/
 
-#if (HAL_USART0)
+#if defined(USE_USART0)
 
-static const GPIO_PIN_CFG_t USART0_pin_tx = {
-    GPIO_PORT_1, GPIO_PIN_1, GPIO_MODE_AF_PP, GPIO_PIN_FUNC_1
+static const GPIO_PIN_ID_t USART0_pin_tx = {
+    USART0_TX_GPIO_PORT, USART0_TX_GPIO_PIN, USART0_TX_GPIO_FUNC
 };
 
-static const GPIO_PIN_CFG_t USART0_pin_rx = {
-    GPIO_PORT_1, GPIO_PIN_0, GPIO_MODE_AF_PP, GPIO_PIN_FUNC_1
+static const GPIO_PIN_ID_t USART0_pin_rx = {
+    USART0_RX_GPIO_PORT, USART0_RX_GPIO_PIN, USART0_RX_GPIO_FUNC
 };
 
 static USART_INFO_t USART0_Info;
@@ -89,7 +88,7 @@ static const USART_RESOURCES_t USART0_Resources = {
     &USART0_Info
 };
 
-#endif // HAL_USART0
+#endif // USE_USART0
 
 /*******************************************************************************
  *  function prototypes (scope: module-local)
@@ -213,11 +212,13 @@ int32_t USART_Initialize(ARM_USART_SignalEvent_t cb_event, USART_RESOURCES_t *us
 static
 int32_t USART_Uninitialize(USART_RESOURCES_t *usart)
 {
+  USART_PINS_t *pins = &usart->pins;
+
   // Reset TX pin configuration
-  GPIO_PinSetFunc(usart->pins.tx->port_num, usart->pins.tx->pin_num  , GPIO_PIN_FUNC_0);
+  GPIO_AFConfig(pins->tx->port, pins->tx->pin, GPIO_PIN_FUNC_0);
 
   // Reset RX pin configuration
-  GPIO_PinSetFunc(usart->pins.rx->port_num, usart->pins.rx->pin_num  , GPIO_PIN_FUNC_0);
+  GPIO_AFConfig(pins->rx->port, pins->rx->pin, GPIO_PIN_FUNC_0);
 
   // DMA Uninitialize
   if (usart->dma_tx || usart->dma_rx)
@@ -467,6 +468,7 @@ static
 int32_t USART_Control(uint32_t control, uint32_t arg, USART_RESOURCES_t *usart)
 {
   uint16_t lcr;
+  USART_PINS_t *pins = &usart->pins;
 
   if ((usart->info->flags & USART_FLAG_POWERED) == 0U) {
     // USART not powered
@@ -481,12 +483,12 @@ int32_t USART_Control(uint32_t control, uint32_t arg, USART_RESOURCES_t *usart)
         return ARM_DRIVER_ERROR;
 
       if (arg) {
-        GPIO_PinConfig(usart->pins.tx);
+        GPIO_AFConfig(pins->tx->port, pins->tx->pin, pins->tx->func);
         usart->info->flags |= USART_FLAG_TX_ENABLED;
       }
       else {
         usart->info->flags &= ~USART_FLAG_TX_ENABLED;
-        GPIO_PinSetFunc(usart->pins.tx->port_num, usart->pins.tx->pin_num  , GPIO_PIN_FUNC_0);
+        GPIO_AFConfig(pins->tx->port, pins->tx->pin, GPIO_PIN_FUNC_0);
       }
       return ARM_DRIVER_OK;
 
@@ -497,14 +499,14 @@ int32_t USART_Control(uint32_t control, uint32_t arg, USART_RESOURCES_t *usart)
 
       // RX Line interrupt enable (overrun, framing, parity error, break)
       if (arg) {
-        GPIO_PinConfig(usart->pins.rx);
+        GPIO_AFConfig(pins->rx->port, pins->rx->pin, pins->rx->func);
         usart->info->flags |= USART_FLAG_RX_ENABLED;
         usart->reg->COMIEN |= COMIEN_ELSI;
       }
       else {
         usart->info->flags &= ~USART_FLAG_RX_ENABLED;
         usart->reg->COMIEN &= ~COMIEN_ELSI;
-        GPIO_PinSetFunc(usart->pins.rx->port_num, usart->pins.rx->pin_num  , GPIO_PIN_FUNC_0);
+        GPIO_AFConfig(pins->rx->port, pins->rx->pin, GPIO_PIN_FUNC_0);
       }
       return ARM_DRIVER_OK;
 
@@ -633,19 +635,19 @@ int32_t USART_Control(uint32_t control, uint32_t arg, USART_RESOURCES_t *usart)
   // Configure TX pin regarding mode and transmitter state
   if (usart->info->flags & USART_FLAG_TX_ENABLED) {
     // Pin function = USART TX
-    GPIO_PinConfig(usart->pins.tx);
+    GPIO_AFConfig(pins->tx->port, pins->tx->pin, pins->tx->func);
   } else {
     // Pin function = GPIO
-    GPIO_PinSetFunc(usart->pins.tx->port_num, usart->pins.tx->pin_num  , GPIO_PIN_FUNC_0);
+    GPIO_AFConfig(pins->tx->port, pins->tx->pin, GPIO_PIN_FUNC_0);
   }
 
   // Configure RX pin regarding mode and receiver state
   if (usart->info->flags & USART_FLAG_RX_ENABLED) {
     // Pin function = USART RX
-    GPIO_PinConfig(usart->pins.rx);
+    GPIO_AFConfig(pins->rx->port, pins->rx->pin, pins->rx->func);
   } else {
     // Pin function = GPIO
-    GPIO_PinSetFunc(usart->pins.rx->port_num, usart->pins.rx->pin_num  , GPIO_PIN_FUNC_0);
+    GPIO_AFConfig(pins->rx->port, pins->rx->pin, GPIO_PIN_FUNC_0);
   }
 
   // Configure Line control register
@@ -792,7 +794,7 @@ void USART_IRQHandler(USART_RESOURCES_t *usart)
   }
 }
 
-#if (HAL_USART0)
+#if defined(USE_USART0)
 
 /* - USART0 Driver wrapper functions -----------------------------------------*/
 
@@ -948,13 +950,13 @@ void UART0_Int_Handler(void)
   USART_IRQHandler(&USART0_Resources);
 }
 
-#endif // HAL_USART0
+#endif // USE_USART0
 
 /*******************************************************************************
  *  global variable definitions  (scope: module-exported)
  ******************************************************************************/
 
-#if (HAL_USART0)
+#if defined(USE_USART0)
 /* USART0 Driver Control Block */
 ARM_DRIVER_USART Driver_USART0 = {
     USARTx_GetVersion,
@@ -972,7 +974,7 @@ ARM_DRIVER_USART Driver_USART0 = {
     USART0_SetModemControl,
     USART0_GetModemStatus
 };
-#endif // HAL_USART0
+#endif // USE_USART0
 
 /*******************************************************************************
  *  function implementations (scope: module-exported)

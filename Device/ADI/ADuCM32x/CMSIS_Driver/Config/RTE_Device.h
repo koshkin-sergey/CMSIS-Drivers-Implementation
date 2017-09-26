@@ -31,12 +31,21 @@
 
 // <e> USART0 (Universal synchronous asynchronous receiver transmitter) [Driver_USART0]
 // </e> USART0 (Universal synchronous asynchronous receiver transmitter) [Driver_USART0]
-#define HAL_USART0                      1
+#define RTE_USART0                      0
+
+// USART0_TX Pin P1.1
+#define RTE_USART0_TX_PORT              GPIO_PORT_1
+#define RTE_USART0_TX_PIN               GPIO_PIN_1
+#define RTE_USART0_TX_FUNC              GPIO_PIN_FUNC_1
+// USART0_RX Pin P1.0
+#define RTE_USART0_RX_PORT              GPIO_PORT_1
+#define RTE_USART0_RX_PIN               GPIO_PIN_0
+#define RTE_USART0_RX_FUNC              GPIO_PIN_FUNC_1
 
 // <e> I2C0 (Inter-integrated Circuit Interface 0) [Driver_I2C0]
 // <i> Configuration settings for Driver_I2C0 in component ::Drivers:I2C
 // </e> I2C0 (Inter-integrated Circuit Interface 0) [Driver_I2C0]
-#define RTE_I2C0                        1
+#define RTE_I2C0                        0
 
 // I2C0_SCL Pin P0.4
 #define RTE_I2C0_SCL_PORT               GPIO_PORT_0

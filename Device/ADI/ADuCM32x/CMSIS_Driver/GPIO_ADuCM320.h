@@ -44,16 +44,6 @@ typedef enum {
 } GPIO_PIN_t;
 
 typedef enum {
-  GPIO_PIN_OUT_LOW  = 0,
-  GPIO_PIN_OUT_HIGH  = 1,
-} GPIO_PIN_OUT_t;
-
-typedef enum {
-  GPIO_DIR_INPUT  = 0,
-  GPIO_DIR_OUTPUT = 1
-} GPIO_DIR_t;
-
-typedef enum {
   GPIO_PIN_FUNC_0 = 0,
   GPIO_PIN_FUNC_1 = 1,
   GPIO_PIN_FUNC_2 = 2,
@@ -61,33 +51,37 @@ typedef enum {
 } GPIO_PIN_FUNC_t;
 
 typedef enum {
-  GPIO_PULL_UP      = 0,
-  GPIO_PULL_DISABLE = 1,
-  GPIO_PULL_DOWN    = 2
+  GPIO_PIN_OUT_LOW  = 0,
+  GPIO_PIN_OUT_HIGH  = 1,
+} GPIO_PIN_OUT_t;
+
+typedef enum {
+  GPIO_PULL_DISABLE = 0,
+  GPIO_PULL_ENABLE  = 1,
 } GPIO_PULL_t;
 
+/**
+ * Pin Mode
+ * PP = push-pull, OD = open-drain, AF = alternate function.
+ */
 typedef enum {
-  GPIO_OD_DISABLE = 0,
-  GPIO_OD_ENABLE = 1
-} GPIO_OD_t;
-
-typedef enum {
-  GPIO_MODE_IN_FL   = 0,
-  GPIO_MODE_IN_PU   = 1,
-  GPIO_MODE_IN_PD   = 2,
-  GPIO_MODE_IN_AN   = 3,
-  GPIO_MODE_OUT_PP  = 4,
-  GPIO_MODE_OUT_OD  = 5,
-  GPIO_MODE_AF_PP   = 6,
-  GPIO_MODE_AF_OD   = 7
+  GPIO_MODE_INPUT   = 0x01,  //!< General-purpose Input
+  GPIO_MODE_ANALOG  = 0x00,  //!< Analog Input
+  GPIO_MODE_OUT_PP  = 0x03,  //!< General-purpose Output push-pull
+  GPIO_MODE_OUT_OD  = 0x07,  //!< General-purpose Output open-drain
 } GPIO_MODE_t;
 
 typedef struct _GPIO_PIN_CFG {
-  GPIO_PORT_t port_num;
-  GPIO_PIN_t pin_num;
   GPIO_MODE_t mode;
-  GPIO_PIN_FUNC_t func_num;
+  GPIO_PULL_t pull_mode;
 } GPIO_PIN_CFG_t;
+
+// Pin identifier
+typedef struct _PIN_ID {
+  GPIO_PORT_t     port;
+  GPIO_PIN_t      pin;
+  GPIO_PIN_FUNC_t func;
+} GPIO_PIN_ID_t;
 
 /*******************************************************************************
  *  exported variables
@@ -96,51 +90,6 @@ typedef struct _GPIO_PIN_CFG {
 /*******************************************************************************
  *  exported function prototypes
  ******************************************************************************/
-
-/**
- * @brief       Setup the pin selection function
- * @param[in]   port_num  GPIO number (0..5)
- * @param[in]   pin_num   Port pin number
- * @param[in]   func_num  Function number, should be one of the following:
- *                        - GPIO_PIN_FUNC_0 : default function
- *                        - GPIO_PIN_FUNC_1 : first alternate function
- *                        - GPIO_PIN_FUNC_2 : second alternate function
- *                        - GPIO_PIN_FUNC_3 : third alternate function
- */
-extern
-void GPIO_PinSetFunc(GPIO_PORT_t port_num, GPIO_PIN_t pin_num, GPIO_PIN_FUNC_t func_num);
-
-/**
- * @brief       Setup resistor mode for each pin
- * @param[in]   port_num  GPIO number (0..5)
- * @param[in]   pin_num   Port pin number
- * @param[in]   mode      Mode number, should be one of the following:
- *                        - GPIO_PULL_UP : Internal pull-up resistor
- *                        - GPIO_PULL_DISABLE : Tri-state
- *                        - GPIO_PULL_DOWN : Internal pull-down resistor
- */
-extern
-void GPIO_SetPullMode(GPIO_PORT_t port_num, GPIO_PIN_t pin_num, GPIO_PULL_t mode);
-
-/**
- * @brief       Setup Open drain mode for each pin
- * @param[in]   port_num  GPIO number (0..5)
- * @param[in]   pin_num   Port pin number
- * @param[in]   mode      Open drain mode number, should be one of the following:
- *                        - GPIO_OD_DISABLE : Pin is in the normal (not open drain) mode
- *                        - GPIO_OD_ENABLE : Pin is in the open drain mode
- */
-extern
-void GPIO_SetOpenDrainMode(GPIO_PORT_t port_num, GPIO_PIN_t pin_num, GPIO_OD_t mode);
-
-/**
- * @brief       Configure GPIO pin direction
- * @param[in]   port_num   GPIO number (0..5)
- * @param[in]   pin_num    Port pin number
- * @param[in]   dir        GPIO_DIR_INPUT, GPIO_DIR_OUTPUT
- */
-extern
-void GPIO_PinSetDir(GPIO_PORT_t port_num, GPIO_PIN_t pin_num, GPIO_DIR_t dir);
 
 /**
  * @brief       Write port pin
@@ -185,12 +134,25 @@ extern
 uint8_t GPIO_PortRead(GPIO_PORT_t port_num);
 
 /**
+ * @fn          void GPIO_PinConfig(GPIO_PORT_t port_num, GPIO_PIN_t pin_num, const GPIO_PIN_CFG_t *cfg)
  * @brief       Configure Pin corresponding to specified parameters
- * @param[in]   cfg Pointer to a GPIO_PIN_CFG_t structure that contains the
- *                  configuration information for the specified pin.
+ * @param[in]   port_num  GPIO port (0..5)
+ * @param[in]   pin_num   Port pin number (0..7)
+ * @param[in]   cfg       Pointer to a GPIO_PIN_CFG_t structure that contains the
+ *                        configuration information for the specified pin.
  */
 extern
-void GPIO_PinConfig(const GPIO_PIN_CFG_t *cfg);
+void GPIO_PinConfig(GPIO_PORT_t port_num, GPIO_PIN_t pin_num, const GPIO_PIN_CFG_t *cfg);
+
+/**
+ * @fn          void GPIO_AFConfig(GPIO_PORT_t port_num, GPIO_PIN_t pin_num, GPIO_PIN_FUNC_t af_num)
+ * @brief       Configure alternate functions
+ * @param[in]   port_num  GPIO port (0..5)
+ * @param[in]   pin_num   Port pin number (0..7)
+ * @param[in]   af_num  Alternate function number
+ */
+extern
+void GPIO_AFConfig(GPIO_PORT_t port_num, GPIO_PIN_t pin_num, GPIO_PIN_FUNC_t af_num);
 
 #endif /* GPIO_ADUCM320_H_ */
 

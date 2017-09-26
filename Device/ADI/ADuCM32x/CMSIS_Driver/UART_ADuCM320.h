@@ -15,12 +15,25 @@
 
 #include "Driver_USART.h"
 
+#include "RTE_Device.h"
 #include "GPIO_ADuCM320.h"
 #include "DMA_ADuCM320.h"
 
 /*******************************************************************************
  *  defines and macros
  ******************************************************************************/
+
+/* USART0 configuration definitions */
+#if defined (RTE_USART0) && (RTE_USART0 == 1)
+  #define USE_USART0
+
+  #define USART0_TX_GPIO_PORT        RTE_USART0_TX_PORT
+  #define USART0_TX_GPIO_PIN         RTE_USART0_TX_PIN
+  #define USART0_TX_GPIO_FUNC        RTE_USART0_TX_FUNC
+  #define USART0_RX_GPIO_PORT        RTE_USART0_RX_PORT
+  #define USART0_RX_GPIO_PIN         RTE_USART0_RX_PIN
+  #define USART0_RX_GPIO_FUNC        RTE_USART0_RX_FUNC
+#endif
 
 // USART flags
 #define USART_FLAG_INITIALIZED       (1U << 0)
@@ -64,8 +77,8 @@ typedef struct _USART_INFO {
 
 // USART Pin Configuration
 typedef const struct _USART_PINS {
-  const GPIO_PIN_CFG_t   *tx;            // TX  Pin identifier
-  const GPIO_PIN_CFG_t   *rx;            // RX  Pin identifier
+  const GPIO_PIN_ID_t    *tx;            // TX Pin identifier
+  const GPIO_PIN_ID_t    *rx;            // RX Pin identifier
 } USART_PINS_t;
 
 // USART DMA

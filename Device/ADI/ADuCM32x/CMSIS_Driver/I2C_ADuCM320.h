@@ -72,11 +72,11 @@
  *  typedefs and structures (scope: module-local)
  ******************************************************************************/
 
-/* USART Pin Configuration */
-typedef const struct _USART_PINS {
-  const GPIO_PIN_CFG_t *scl;                // SCL Pin identifier
-  const GPIO_PIN_CFG_t *sda;                // SDA Pin identifier
-} I2C_PINS;
+/* I2C Pin Configuration */
+typedef const struct _I2C_PINS {
+  const GPIO_PIN_ID_t  *scl;                // SCL Pin identifier
+  const GPIO_PIN_ID_t  *sda;                // SDA Pin identifier
+} I2C_PIN;
 
 /* I2C Control Information */
 typedef struct {
@@ -91,7 +91,7 @@ typedef struct {
 /* I2C Resource Configuration */
 typedef struct {
   ADI_I2C_TypeDef      *reg;                // I2C register interface
-  I2C_PINS              pins;               // I2C pins configuration
+  I2C_PIN               pin;                // I2C pin configuration
   IRQn_Type             i2c_master_irq;     // I2C Master Event IRQ Number
   IRQn_Type             i2c_slave_irq;      // I2C Slave Event IRQ Number
   CLK_PERIPH            clk_periph;         // I2C clock user control

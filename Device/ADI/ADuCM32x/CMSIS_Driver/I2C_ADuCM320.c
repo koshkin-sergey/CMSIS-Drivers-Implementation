@@ -44,58 +44,58 @@ static const ARM_I2C_CAPABILITIES DriverCapabilities = {
 
 #if defined(USE_I2C0)
 
-static const GPIO_PIN_CFG_t I2C0_pin_SCL = {
-    I2C0_SCL_GPIO_PORT, I2C0_SCL_GPIO_PIN, GPIO_MODE_AF_OD, I2C0_SCL_GPIO_FUNC
-};
-
-static const GPIO_PIN_CFG_t I2C0_pin_SDA = {
-    I2C0_SDA_GPIO_PORT, I2C0_SDA_GPIO_PIN, GPIO_MODE_AF_OD, I2C0_SDA_GPIO_FUNC
-};
-
 /* I2C0 Control Information */
 static I2C_CTRL I2C0_Ctrl = { 0 };
+
+static const GPIO_PIN_ID_t I2C0_pin_scl = {
+    I2C0_SCL_GPIO_PORT, I2C0_SCL_GPIO_PIN, I2C0_SCL_GPIO_FUNC
+};
+
+static const GPIO_PIN_ID_t I2C0_pin_sda = {
+    I2C0_SDA_GPIO_PORT, I2C0_SDA_GPIO_PIN, I2C0_SDA_GPIO_FUNC
+};
 
 /* I2C0 Resources */
 static I2C_RESOURCES I2C0_Resources = {
   pADI_I2C0,
   {
-    &I2C0_pin_SCL,
-    &I2C0_pin_SDA,
+      &I2C0_pin_scl,
+      &I2C0_pin_sda,
   },
   I2C0M_IRQn,
   I2C0S_IRQn,
   CLK_PERIPH_I2C0,
   &I2C0_Ctrl,
 };
-#endif /* HAL_I2C0 */
+#endif /* USE_I2C0 */
 
 
 #if defined(USE_I2C1)
 
-static const GPIO_PIN_CFG_t I2C1_pin_SCL = {
-    I2C1_SCL_GPIO_PORT, I2C1_SCL_GPIO_PIN, GPIO_MODE_AF_OD, I2C1_SCL_GPIO_FUNC
-};
-
-static const GPIO_PIN_CFG_t I2C1_pin_SDA = {
-    I2C1_SDA_GPIO_PORT, I2C1_SDA_GPIO_PIN, GPIO_MODE_AF_OD, I2C1_SDA_GPIO_FUNC
-};
-
 /* I2C1 Control Information */
 static I2C_CTRL I2C1_Ctrl = { 0 };
+
+static const GPIO_PIN_ID_t I2C1_pin_scl = {
+    I2C1_SCL_GPIO_PORT, I2C1_SCL_GPIO_PIN, I2C1_SCL_GPIO_FUNC
+};
+
+static const GPIO_PIN_ID_t I2C1_pin_sda = {
+    I2C1_SDA_GPIO_PORT, I2C1_SDA_GPIO_PIN, I2C1_SDA_GPIO_FUNC
+};
 
 /* I2C1 Resources */
 static I2C_RESOURCES I2C1_Resources = {
   pADI_I2C1,
   {
-    &I2C1_pin_SCL,
-    &I2C1_pin_SDA,
+      &I2C1_pin_scl,
+      &I2C1_pin_sda,
   },
   I2C1M_IRQn,
   I2C1S_IRQn,
   CLK_PERIPH_I2C1,
   &I2C1_Ctrl,
 };
-#endif /* HAL_I2C1 */
+#endif /* USE_I2C1 */
 
 /*******************************************************************************
  *  function prototypes (scope: module-local)
@@ -171,18 +171,16 @@ static
 int32_t I2Cx_Initialize(ARM_I2C_SignalEvent_t cb_event, I2C_RESOURCES *i2c)
 {
   I2C_CTRL *ctrl = i2c->ctrl;
-  I2C_PINS *pins = &i2c->pins;
+  I2C_PIN *pin = &i2c->pin;
 
   if (ctrl->flags & I2C_FLAG_INIT) {
     return ARM_DRIVER_OK;
   }
 
-  /* Configure I2C Pins */
-  if (pins->scl == NULL || pins->sda == NULL)
-    return ARM_DRIVER_ERROR;
-
-  GPIO_PinConfig(pins->scl);
-  GPIO_PinConfig(pins->sda);
+  /* Configure SCL Pin */
+  GPIO_AFConfig(pin->scl->port, pin->scl->pin, pin->scl->func);
+  /* Configure SDA Pin */
+  GPIO_AFConfig(pin->sda->port, pin->sda->pin, pin->sda->func);
 
   /* Reset Run-Time information structure */
   memset(ctrl, 0x00, sizeof(I2C_CTRL));
@@ -202,13 +200,14 @@ int32_t I2Cx_Initialize(ARM_I2C_SignalEvent_t cb_event, I2C_RESOURCES *i2c)
 static
 int32_t I2Cx_Uninitialize(I2C_RESOURCES *i2c)
 {
-  I2C_PINS *pins = &i2c->pins;
+  I2C_PIN *pin = &i2c->pin;
+
+  /* Unconfigure SCL Pin */
+  GPIO_AFConfig(pin->scl->port, pin->scl->pin, GPIO_PIN_FUNC_0);
+  /* Unconfigure SDA Pin */
+  GPIO_AFConfig(pin->sda->port, pin->sda->pin, GPIO_PIN_FUNC_0);
 
   i2c->ctrl->flags = 0;
-
-  /* Unconfigure SCL and SDA pins */
-  GPIO_PinSetFunc(pins->scl->port_num, pins->scl->pin_num, GPIO_PIN_FUNC_0);
-  GPIO_PinSetFunc(pins->sda->port_num, pins->sda->pin_num, GPIO_PIN_FUNC_0);
 
   return ARM_DRIVER_OK;
 }

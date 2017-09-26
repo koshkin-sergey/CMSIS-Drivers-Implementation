@@ -76,92 +76,6 @@ ADI_GPIO_TypeDef* GetPort(GPIO_PORT_t port_num)
  ******************************************************************************/
 
 /**
- * @brief       Setup the pin selection function
- * @param[in]   port_num  GPIO number (0..5)
- * @param[in]   pin_num   Port pin number
- * @param[in]   func_num  Function number, should be one of the following:
- *                        - GPIO_PIN_FUNC_0 : default function
- *                        - GPIO_PIN_FUNC_1 : first alternate function
- *                        - GPIO_PIN_FUNC_2 : second alternate function
- *                        - GPIO_PIN_FUNC_3 : third alternate function
- */
-void GPIO_PinSetFunc(GPIO_PORT_t port_num, GPIO_PIN_t pin_num, GPIO_PIN_FUNC_t func_num)
-{
-  ADI_GPIO_TypeDef *port = GetPort(port_num);
-  uint16_t con = port->GPCON;
-
-  con &= ~(3U << (pin_num << 1));
-  con |= func_num << (pin_num << 1);
-  port->GPCON = con;
-}
-
-/**
- * @brief       Setup resistor mode for each pin
- * @param[in]   port_num  GPIO number (0..5)
- * @param[in]   pin_num   Port pin number
- * @param[in]   mode      Mode number, should be one of the following:
- *                        - GPIO_PULL_UP : Internal pull-up resistor
- *                        - GPIO_PULL_DISABLE : Tri-state
- *                        - GPIO_PULL_DOWN : Internal pull-down resistor
- */
-void GPIO_SetPullMode(GPIO_PORT_t port_num, GPIO_PIN_t pin_num, GPIO_PULL_t mode)
-{
-  ADI_GPIO_TypeDef *port = GetPort(port_num);
-
-  switch (mode) {
-    case GPIO_PULL_UP:
-    case GPIO_PULL_DOWN:
-      port->GPPUL |= (1U << pin_num);
-      break;
-
-    case GPIO_PULL_DISABLE:
-      port->GPPUL &= ~(1U << pin_num);
-      break;
-  }
-}
-
-/**
- * @brief       Setup Open drain mode for each pin
- * @param[in]   port_num  GPIO number (0..5)
- * @param[in]   pin_num   Port pin number
- * @param[in]   mode      Open drain mode number, should be one of the following:
- *                        - GPIO_OD_DISABLE : Pin is in the normal (not open drain) mode
- *                        - GPIO_OD_ENABLE : Pin is in the open drain mode
- */
-void GPIO_SetOpenDrainMode(GPIO_PORT_t port_num, GPIO_PIN_t pin_num, GPIO_OD_t mode)
-{
-  ADI_GPIO_TypeDef *port = GetPort(port_num);
-
-  if (mode == GPIO_OD_ENABLE)
-    port->GPODE |= (1U << pin_num);
-  else
-    port->GPODE &= ~(1U << pin_num);
-}
-
-/**
- * @brief       Configure GPIO pin direction
- * @param[in]   port_num   GPIO number (0..5)
- * @param[in]   pin_num    Port pin number
- * @param[in]   dir        GPIO_DIR_INPUT, GPIO_DIR_OUTPUT
- */
-void GPIO_PinSetDir(GPIO_PORT_t port_num, GPIO_PIN_t pin_num, GPIO_DIR_t dir)
-{
-  ADI_GPIO_TypeDef *port = GetPort(port_num);
-
-  switch (dir) {
-    case GPIO_DIR_INPUT:
-      port->GPIE |= (1U << pin_num);
-      port->GPOE &= ~(1U << pin_num);
-      break;
-
-    case GPIO_DIR_OUTPUT:
-      port->GPIE &= ~(1U << pin_num);
-      port->GPOE |= (1U << pin_num);
-      break;
-  }
-}
-
-/**
  * @brief       Write port pin
  * @param[in]   port_num  GPIO number (0..5)
  * @param[in]   pin_num   Port pin number
@@ -229,61 +143,50 @@ uint8_t GPIO_PortRead(GPIO_PORT_t port_num)
 }
 
 /**
+ * @fn          void GPIO_PinConfig(GPIO_PORT_t port_num, GPIO_PIN_t pin_num, const GPIO_PIN_CFG_t *cfg)
  * @brief       Configure Pin corresponding to specified parameters
- * @param[in]   cfg Pointer to a GPIO_PIN_CFG_t structure that contains the
- *                  configuration information for the specified pin.
+ * @param[in]   port_num  GPIO port (0..5)
+ * @param[in]   pin_num   Port pin number (0..7)
+ * @param[in]   cfg       Pointer to a GPIO_PIN_CFG_t structure that contains the
+ *                        configuration information for the specified pin.
  */
-void GPIO_PinConfig(const GPIO_PIN_CFG_t *cfg)
+void GPIO_PinConfig(GPIO_PORT_t port_num, GPIO_PIN_t pin_num, const GPIO_PIN_CFG_t *cfg)
 {
   ADI_GPIO_TypeDef *port;
   uint8_t pin;
+  uint8_t oer, ier, pulr, oder;
 
   if (cfg == NULL)
     return;
 
-  port = GetPort(cfg->port_num);
-  pin = (uint8_t)(1U << cfg->pin_num);
+  port = GetPort(port_num);
+  pin = (uint8_t)(1U << pin_num);
 
-  if (cfg->mode == GPIO_MODE_IN_AN)
-    port->GPIE &= ~pin;
-  else
-    port->GPIE |= pin;
+  oer = (port->GPOE & ~(1U << pin));
+  ier = (port->GPIE & ~(1U << pin));
+  oder = (port->GPODE & ~(1U << pin));
+  pulr = (port->GPPUL & ~(1U << pin));
 
-  switch (cfg->mode) {
-    case GPIO_MODE_IN_FL:
-    case GPIO_MODE_IN_AN:
-      port->GPOE &= ~pin;
-      port->GPPUL &= ~pin;
-      break;
+  port->GPIE = (ier | (((cfg->mode >> 0) & 1U) << pin));
+  port->GPOE = (oer | (((cfg->mode >> 1) & 1U) << pin));
+  port->GPODE = (oder | (((cfg->mode >> 2) & 1U) << pin));
+  port->GPPUL = (pulr | ((cfg->pull_mode & 1U) << pin));
+}
 
-    case GPIO_MODE_IN_PU:
-    case GPIO_MODE_IN_PD:
-      port->GPOE &= ~pin;
-      port->GPPUL |= pin;
-      break;
+/**
+ * @fn          void GPIO_AFConfig(GPIO_PORT_t port_num, GPIO_PIN_t pin_num, GPIO_PIN_FUNC_t af_num)
+ * @brief       Configure alternate functions
+ * @param[in]   port_num  GPIO port (0..5)
+ * @param[in]   pin_num   Port pin number (0..7)
+ * @param[in]   af_num  Alternate function number
+ */
+void GPIO_AFConfig(GPIO_PORT_t port_num, GPIO_PIN_t pin_num, GPIO_PIN_FUNC_t af_num)
+{
+  ADI_GPIO_TypeDef *port = GetPort(port_num);
+  uint32_t shift = (pin_num << 1);
+  uint16_t con = (port->GPCON & ~(3U << shift));
 
-    case GPIO_MODE_OUT_PP:
-      port->GPOE |= pin;
-      port->GPODE &= ~pin;
-      break;
-
-    case GPIO_MODE_OUT_OD:
-      port->GPOE |= pin;
-      port->GPODE |= pin;
-      break;
-
-    case GPIO_MODE_AF_OD:
-      port->GPPUL &= ~pin;
-      /* no break */
-    case GPIO_MODE_AF_PP:
-    {
-      uint16_t con = port->GPCON;
-      con &= ~(3U << (cfg->pin_num << 1));
-      con |= cfg->func_num << (cfg->pin_num << 1);
-      port->GPCON = con;
-    }
-      break;
-  }
+  port->GPCON = (con | ((uint16_t)af_num << shift));
 }
 
 /* ----------------------------- End of file ---------------------------------*/
