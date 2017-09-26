@@ -162,15 +162,15 @@ void GPIO_PinConfig(GPIO_PORT_t port_num, GPIO_PIN_t pin_num, const GPIO_PIN_CFG
   port = GetPort(port_num);
   pin = (uint8_t)(1U << pin_num);
 
-  oer = (port->GPOE & ~(1U << pin));
-  ier = (port->GPIE & ~(1U << pin));
-  oder = (port->GPODE & ~(1U << pin));
-  pulr = (port->GPPUL & ~(1U << pin));
+  oer = (port->GPOE & ~pin);
+  ier = (port->GPIE & ~pin);
+  oder = (port->GPODE & ~pin);
+  pulr = (port->GPPUL & ~pin);
 
-  port->GPIE = (ier | (((cfg->mode >> 0) & 1U) << pin));
-  port->GPOE = (oer | (((cfg->mode >> 1) & 1U) << pin));
-  port->GPODE = (oder | (((cfg->mode >> 2) & 1U) << pin));
-  port->GPPUL = (pulr | ((cfg->pull_mode & 1U) << pin));
+  port->GPIE = (ier | (((cfg->mode >> 0) & 1U) << pin_num));
+  port->GPOE = (oer | (((cfg->mode >> 1) & 1U) << pin_num));
+  port->GPODE = (oder | (((cfg->mode >> 2) & 1U) << pin_num));
+  port->GPPUL = (pulr | ((cfg->pull_mode & 1U) << pin_num));
 }
 
 /**
