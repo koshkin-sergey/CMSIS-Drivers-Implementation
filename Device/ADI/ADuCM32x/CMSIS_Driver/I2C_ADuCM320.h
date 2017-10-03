@@ -59,14 +59,15 @@
 #endif
 
 /* I2C Driver state flags */
-#define I2C_FLAG_INIT         (1UL << 0)    // Driver initialized
-#define I2C_FLAG_POWER        (1UL << 1)    // Driver power on
-#define I2C_FLAG_SETUP        (1UL << 2)    // Master configured, clock set
-#define I2C_FLAG_SLAVE_RX     (1UL << 3)    // Slave receive registered
-#define I2C_FLAG_SLAVE_ADDR   (1UL << 4)    // Addressed Slave
-#define I2C_FLAG_TX_RESTART   (1UL << 5)
-#define I2C_FLAG_RX_RESTART   (1UL << 6)
-#define I2C_FLAG_ADDRESS_NACK (1UL << 7)
+#define I2C_FLAG_INIT             (1UL << 0)    // Driver initialized
+#define I2C_FLAG_POWER            (1UL << 1)    // Driver power on
+#define I2C_FLAG_SETUP            (1UL << 2)    // Master configured, clock set
+#define I2C_FLAG_SLAVE_RX         (1UL << 3)    // Slave receive registered
+#define I2C_FLAG_SLAVE_ADDR       (1UL << 4)    // Addressed Slave
+#define I2C_FLAG_TX_RESTART       (1UL << 5)
+#define I2C_FLAG_RX_RESTART       (1UL << 6)
+#define I2C_FLAG_ADDRESS_NACK     (1UL << 7)
+#define I2C_FLAG_SLAVE_BUF_EMPTY  (1UL << 8)
 
 /*******************************************************************************
  *  typedefs and structures (scope: module-local)
@@ -86,6 +87,7 @@ typedef struct {
   uint8_t              *data;               // Data to transfer
   int32_t               num;                // Number of bytes to transfer
   int32_t               cnt;                // Data transfer counter
+  int32_t               data_cnt;
 } I2C_CTRL;
 
 /* I2C Resource Configuration */

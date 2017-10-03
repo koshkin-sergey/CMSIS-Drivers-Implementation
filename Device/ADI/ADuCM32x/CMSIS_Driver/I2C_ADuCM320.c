@@ -21,6 +21,11 @@
  *  defines and macros (scope: module-local)
  ******************************************************************************/
 
+#define SLAVE_MODE      0U
+#define MASTER_MODE     1U
+#define TX_DIRECTION    0U
+#define RX_DIRECTION    1U
+
 #define ARM_I2C_DRV_VERSION ARM_DRIVER_VERSION_MAJOR_MINOR(1,0) /* driver version */
 
 /*******************************************************************************
@@ -413,11 +418,11 @@ int32_t I2Cx_MasterTransmit(uint32_t addr, const uint8_t *data, uint32_t num,
   ctrl->cnt  = 0;
 
   /* Update driver status */
-  ctrl->status.busy             = 1;
-  ctrl->status.mode             = 1;
-  ctrl->status.direction        = 0;
-  ctrl->status.arbitration_lost = 0;
-  ctrl->status.bus_error        = 0;
+  ctrl->status.busy             = 1U;
+  ctrl->status.mode             = MASTER_MODE;
+  ctrl->status.direction        = TX_DIRECTION;
+  ctrl->status.arbitration_lost = 0U;
+  ctrl->status.bus_error        = 0U;
 
   reg->I2CMCON |= (I2CMCON_IENMTX | I2CMCON_MASEN);
   reg->I2CADR0 = (addr << 1) & 0xFE;
@@ -466,11 +471,11 @@ int32_t I2Cx_MasterReceive(uint32_t addr, uint8_t *data, uint32_t num,
   ctrl->cnt = 0;
 
   /* Update driver status */
-  ctrl->status.busy             = 1;
-  ctrl->status.mode             = 1;
-  ctrl->status.direction        = 1;
-  ctrl->status.arbitration_lost = 0;
-  ctrl->status.bus_error        = 0;
+  ctrl->status.busy             = 1U;
+  ctrl->status.mode             = MASTER_MODE;
+  ctrl->status.direction        = RX_DIRECTION;
+  ctrl->status.arbitration_lost = 0U;
+  ctrl->status.bus_error        = 0U;
 
   reg->I2CMCON |= (I2CMCON_IENMRX | I2CMCON_MASEN);
 
@@ -504,14 +509,23 @@ int32_t I2Cx_SlaveTransmit(const uint8_t *data, uint32_t num, I2C_RESOURCES *i2c
   }
 
   /* Set control variables */
-  ctrl->flags &= ~I2C_FLAG_SLAVE_RX;
   ctrl->data  = (uint8_t *)data;
   ctrl->num   = num;
-  ctrl->cnt   = -1;
+  ctrl->data_cnt = 0;
 
-  /* Update driver status */
-  ctrl->status.general_call = 0;
-  ctrl->status.bus_error    = 0;
+  if (ctrl->flags & I2C_FLAG_SLAVE_BUF_EMPTY) {
+    ctrl->flags &= ~I2C_FLAG_SLAVE_BUF_EMPTY;
+    /* Enable slave transmit request interrupt */
+    i2c->reg->I2CSCON |= I2CSCON_IENSTX;
+  }
+  else {
+    ctrl->flags &= ~I2C_FLAG_SLAVE_RX;
+    ctrl->cnt   = -1;
+
+    /* Update driver status */
+    ctrl->status.general_call = 0;
+    ctrl->status.bus_error    = 0;
+  }
 
   return ARM_DRIVER_OK;
 }
@@ -562,7 +576,23 @@ int32_t I2Cx_SlaveReceive(uint8_t *data, uint32_t num, I2C_RESOURCES *i2c)
 static
 int32_t I2Cx_GetDataCount(I2C_RESOURCES *i2c)
 {
-  return (i2c->ctrl->cnt);
+  int32_t cnt = i2c->ctrl->cnt;
+  I2C_CTRL *ctrl = i2c->ctrl;
+
+  if ((ctrl->status.direction == TX_DIRECTION) && (cnt > 0)) {
+    int32_t fifo_cnt;
+
+    if (ctrl->status.mode == SLAVE_MODE) {
+      fifo_cnt = GetSlaveTxFifoCnt(i2c);
+    }
+    else {
+      fifo_cnt = GetMasterTxFifoCnt(i2c);
+    }
+
+    cnt -= fifo_cnt;
+  }
+
+  return cnt;
 }
 
 /**
@@ -620,7 +650,7 @@ void I2Cx_MasterHandler(I2C_RESOURCES *i2c)
       }
     }
     else if (status & (I2CMSTA_NACKADDR | I2CMSTA_NACKDATA)) {
-      if (ctrl->status.direction == 0) {
+      if (ctrl->status.direction == TX_DIRECTION) {
         uint32_t fifo_cnt = GetMasterTxFifoCnt(i2c);
 
         if (fifo_cnt != 0) {
@@ -654,8 +684,8 @@ void I2Cx_MasterHandler(I2C_RESOURCES *i2c)
 
     ctrl->data = NULL;
     ctrl->flags &= ~(I2C_FLAG_TX_RESTART | I2C_FLAG_RX_RESTART | I2C_FLAG_ADDRESS_NACK);
-    ctrl->status.busy = 0;
-    ctrl->status.mode = 0;
+    ctrl->status.busy = 0U;
+    ctrl->status.mode = SLAVE_MODE;
   }
 
   /* Callback event notification */
@@ -686,11 +716,11 @@ void I2Cx_SlaveHandler(I2C_RESOURCES *i2c)
     
 		if (!(ctrl->flags & I2C_FLAG_SLAVE_ADDR)) {
       if (status & I2CSSTA_STXREQ) {
-        ctrl->status.direction = 0;
+        ctrl->status.direction = TX_DIRECTION;
         event = ARM_I2C_EVENT_SLAVE_TRANSMIT;
       }
       else if (status & I2CSSTA_SRXREQ) {
-        ctrl->status.direction = 1;
+        ctrl->status.direction = RX_DIRECTION;
         event = ARM_I2C_EVENT_SLAVE_RECEIVE;
       }
 
@@ -711,11 +741,16 @@ void I2Cx_SlaveHandler(I2C_RESOURCES *i2c)
     }
 
     if (status & I2CSSTA_STXREQ) {
-      reg->I2CSTX = ctrl->data[ctrl->cnt++];
+      reg->I2CSTX = ctrl->data[ctrl->data_cnt++];
+      ctrl->cnt++;
 
-      if (ctrl->cnt == ctrl->num) {
-        ctrl->flags &= ~I2C_FLAG_SLAVE_ADDR;
+      if (ctrl->data_cnt == ctrl->num) {
+        /* Disable slave transmit request interrupt */
         reg->I2CSCON &= ~I2CSCON_IENSTX;
+        ctrl->status.busy = 0;
+        ctrl->data = NULL;
+        ctrl->flags |= I2C_FLAG_SLAVE_BUF_EMPTY;
+        event = ARM_I2C_EVENT_SLAVE_BUF_EMPTY;
       }
     }
     else if (status & I2CSSTA_SRXREQ) {
@@ -728,7 +763,7 @@ void I2Cx_SlaveHandler(I2C_RESOURCES *i2c)
   }
   else if (status & I2CSSTA_STOP) {
     /* STOP received */
-    if (ctrl->status.direction == 0) {
+    if (ctrl->status.direction == TX_DIRECTION) {
       uint32_t fifo_cnt = GetSlaveTxFifoCnt(i2c);
 
       if (fifo_cnt != 0) {
@@ -736,9 +771,8 @@ void I2Cx_SlaveHandler(I2C_RESOURCES *i2c)
         reg->I2CFSTA = I2CFSTA_SFLUSH;
       }
 
-      if (!(ctrl->flags & I2C_FLAG_SLAVE_ADDR)) {
-        reg->I2CSCON |= I2CSCON_IENSTX;
-      }
+      /* Enable slave transmit request interrupt */
+      reg->I2CSCON |= I2CSCON_IENSTX;
     }
 
     ctrl->status.busy = 0;
@@ -754,7 +788,7 @@ void I2Cx_SlaveHandler(I2C_RESOURCES *i2c)
     }
 
     ctrl->data = NULL;
-    ctrl->flags &= ~I2C_FLAG_SLAVE_ADDR;
+    ctrl->flags &= ~(I2C_FLAG_SLAVE_ADDR | I2C_FLAG_SLAVE_BUF_EMPTY);
   }
 
 
