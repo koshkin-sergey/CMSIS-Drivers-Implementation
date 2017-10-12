@@ -504,7 +504,7 @@ int32_t I2Cx_SlaveTransmit(const uint8_t *data, uint32_t num, I2C_RESOURCES *i2c
   }
 
   if (ctrl->status.busy) {
-    /* Transfer operation in progress, Master stalled or Slave receive stalled */
+    /* Transfer operation in progress */
     return ARM_DRIVER_ERROR_BUSY;
   }
 
@@ -549,7 +549,7 @@ int32_t I2Cx_SlaveReceive(uint8_t *data, uint32_t num, I2C_RESOURCES *i2c)
   }
 
   if (ctrl->status.busy) {
-    /* Transfer operation in progress, Master stalled or Slave transmit stalled */
+    /* Transfer operation in progress */
     return ARM_DRIVER_ERROR_BUSY;
   }
 
@@ -709,9 +709,7 @@ void I2Cx_SlaveHandler(I2C_RESOURCES *i2c)
 
   if (status & I2CSSTA_SBUSY) {
     if (status & I2CSSTA_REPSTART) {
-      ctrl->status.busy = 0;
-			ctrl->flags &= ~I2C_FLAG_SLAVE_ADDR;
-			return;
+      goto stop;
     }
     
 		if (!(ctrl->flags & I2C_FLAG_SLAVE_ADDR)) {
@@ -748,9 +746,8 @@ void I2Cx_SlaveHandler(I2C_RESOURCES *i2c)
         /* Disable slave transmit request interrupt */
         reg->I2CSCON &= ~I2CSCON_IENSTX;
         ctrl->status.busy = 0;
-        ctrl->data = NULL;
         ctrl->flags |= I2C_FLAG_SLAVE_BUF_EMPTY;
-        event = ARM_I2C_EVENT_SLAVE_BUF_EMPTY;
+        event = ARM_I2C_EVENT_SLAVE_TRANSMIT;
       }
     }
     else if (status & I2CSSTA_SRXREQ) {
@@ -763,6 +760,7 @@ void I2Cx_SlaveHandler(I2C_RESOURCES *i2c)
   }
   else if (status & I2CSSTA_STOP) {
     /* STOP received */
+stop:
     if (ctrl->status.direction == TX_DIRECTION) {
       uint32_t fifo_cnt = GetSlaveTxFifoCnt(i2c);
 

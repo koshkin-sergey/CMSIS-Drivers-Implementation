@@ -102,12 +102,11 @@ typedef volatile struct _ARM_I2C_STATUS {
 #define ARM_I2C_EVENT_TRANSFER_INCOMPLETE (1UL << 1)  ///< Master/Slave Transmit/Receive incomplete transfer
 #define ARM_I2C_EVENT_SLAVE_TRANSMIT      (1UL << 2)  ///< Slave Transmit operation requested
 #define ARM_I2C_EVENT_SLAVE_RECEIVE       (1UL << 3)  ///< Slave Receive operation requested
-#define ARM_I2C_EVENT_SLAVE_BUF_EMPTY     (1UL << 4)  ///< Slave buffer is empty
-#define ARM_I2C_EVENT_ADDRESS_NACK        (1UL << 5)  ///< Address not acknowledged from Slave
-#define ARM_I2C_EVENT_GENERAL_CALL        (1UL << 6)  ///< General Call indication
-#define ARM_I2C_EVENT_ARBITRATION_LOST    (1UL << 7)  ///< Master lost arbitration
-#define ARM_I2C_EVENT_BUS_ERROR           (1UL << 8)  ///< Bus error detected (START/STOP at illegal position)
-#define ARM_I2C_EVENT_BUS_CLEAR           (1UL << 9)  ///< Bus clear finished
+#define ARM_I2C_EVENT_ADDRESS_NACK        (1UL << 4)  ///< Address not acknowledged from Slave
+#define ARM_I2C_EVENT_GENERAL_CALL        (1UL << 5)  ///< General Call indication
+#define ARM_I2C_EVENT_ARBITRATION_LOST    (1UL << 6)  ///< Master lost arbitration
+#define ARM_I2C_EVENT_BUS_ERROR           (1UL << 7)  ///< Bus error detected (START/STOP at illegal position)
+#define ARM_I2C_EVENT_BUS_CLEAR           (1UL << 8)  ///< Bus clear finished
 
 
 // Function documentation
