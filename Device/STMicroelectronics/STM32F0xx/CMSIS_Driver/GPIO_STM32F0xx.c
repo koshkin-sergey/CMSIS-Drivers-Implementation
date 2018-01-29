@@ -256,7 +256,7 @@ void GPIO_PinConfig(GPIO_PORT_t port, GPIO_PIN_t pin, const GPIO_PIN_CFG_t *cfg)
 {
   GPIO_TypeDef *gpio;
   uint32_t shift;
-  uint32_t moder, otyper, ospeedr;
+  uint32_t moder, otyper, ospeedr, pupdr;
 
   if (cfg == NULL)
     return;
@@ -267,10 +267,12 @@ void GPIO_PinConfig(GPIO_PORT_t port, GPIO_PIN_t pin, const GPIO_PIN_CFG_t *cfg)
   moder = (gpio->MODER & ~(3UL << shift));
   otyper = (gpio->OTYPER & ~(1UL << pin));
   ospeedr = (gpio->OSPEEDR  & ~(3UL << shift));
+  pupdr = (gpio->PUPDR & ~(3UL << shift));
 
   gpio->MODER = (moder | ((cfg->mode & 3UL) << shift));
   gpio->OTYPER = (otyper | (((cfg->mode >> 8) & 1UL) << pin));
   gpio->OSPEEDR = (ospeedr | ((cfg->speed & 3UL) << shift));
+  gpio->PUPDR = (pupdr | ((cfg->pull_mode & 3UL) << shift));
 }
 
 /**
