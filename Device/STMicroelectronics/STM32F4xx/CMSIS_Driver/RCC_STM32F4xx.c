@@ -183,13 +183,13 @@ void RCC_ClkInit(RCC_ClkInit_t *init, uint32_t flash_latency)
   /* PCLK1 Configuration */
   if (init->type & RCC_CLK_TYPE_PCLK1) {
     tmp = (RCC->CFGR & ~RCC_CFGR_PPRE1);
-    RCC->CFGR = (tmp | init->APB1_clk_div);
+    RCC->CFGR = (tmp | (init->APB1_clk_div << RCC_CFGR_PPRE1_Pos));
   }
 
   /* PCLK2 Configuration */
   if (init->type & RCC_CLK_TYPE_PCLK2) {
     tmp = (RCC->CFGR & ~RCC_CFGR_PPRE2);
-    RCC->CFGR = (tmp | init->APB2_clk_div);
+    RCC->CFGR = (tmp | (init->APB2_clk_div << RCC_CFGR_PPRE2_Pos));
   }
 
   chip_id = (DBGMCU->IDCODE >> 16U);
@@ -256,7 +256,7 @@ uint32_t RCC_GetFreq(RCC_FREQ_t type)
   /* Compute HCLK clock frequency --------------------------------------------*/
   uint32_t hclk = (sysclk >> AHBPrescTable[(rcc_cfgr & RCC_CFGR_HPRE) >> 4U]);
 
-  if (type == RCC_FREQ_HCLK)
+  if (type == RCC_FREQ_AHB)
     return hclk;
 
   /* Compute PCLK clock frequency --------------------------------------------*/
@@ -295,7 +295,7 @@ uint32_t RCC_I2SPLL_Config(uint32_t plln, uint32_t pllr)
 
 /**
  * @fn          void RCC_EnablePeriph(RCC_Periph_t *periph)
- * @param[out]  periph
+ * @param[in]   periph
  */
 void RCC_EnablePeriph(const RCC_Periph_t *periph)
 {
@@ -304,7 +304,7 @@ void RCC_EnablePeriph(const RCC_Periph_t *periph)
 
 /**
  * @fn          void RCC_DisablePeriph(RCC_Periph_t *periph)
- * @param[out]  periph
+ * @param[in]   periph
  */
 void RCC_DisablePeriph(const RCC_Periph_t *periph)
 {
@@ -313,7 +313,7 @@ void RCC_DisablePeriph(const RCC_Periph_t *periph)
 
 /**
  * @fn          void RCC_ResetPeriph(RCC_Periph_t *periph)
- * @param[out]  periph
+ * @param[in]   periph
  */
 void RCC_ResetPeriph(const RCC_Periph_t *periph)
 {

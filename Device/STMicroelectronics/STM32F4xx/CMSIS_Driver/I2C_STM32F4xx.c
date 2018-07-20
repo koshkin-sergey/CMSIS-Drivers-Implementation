@@ -196,12 +196,12 @@ int32_t I2Cx_Initialize(ARM_I2C_SignalEvent_t cb_event, I2C_RESOURCES *i2c)
 
   /* Configure SCL Pin */
   GPIO_PortClock(io->scl_port, GPIO_PORT_CLK_ENABLE);
-  GPIO_PinConfig(io->scl_port, io->scl_pin, &I2C_pin_cfg_af);
   GPIO_AFConfig(io->scl_port, io->scl_pin, io->scl_func);
+  GPIO_PinConfig(io->scl_port, io->scl_pin, &I2C_pin_cfg_af);
   /* Configure SDA Pin */
   GPIO_PortClock(io->sda_port, GPIO_PORT_CLK_ENABLE);
-  GPIO_PinConfig(io->sda_port, io->sda_pin, &I2C_pin_cfg_af);
   GPIO_AFConfig(io->sda_port, io->sda_pin, io->sda_func);
+  GPIO_PinConfig(io->sda_port, io->sda_pin, &I2C_pin_cfg_af);
 
   /* Reset Run-Time information structure */
   memset(info, 0x00, sizeof(I2C_INFO));

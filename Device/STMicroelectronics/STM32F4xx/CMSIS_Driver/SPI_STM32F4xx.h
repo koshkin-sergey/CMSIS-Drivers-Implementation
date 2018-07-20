@@ -55,6 +55,42 @@
 #error "SPI not configured in RTE_Device.h!"
 #endif
 
+#define SPIx_EXPORT_DRIVER(x)                                                                                                                                               \
+static int32_t        SPI##x##_Initialize      (ARM_SPI_SignalEvent_t pSignalEvent)                { return SPI_Initialize (pSignalEvent, &SPI##x##_Resources); }           \
+static int32_t        SPI##x##_Uninitialize    (void)                                              { return SPI_Uninitialize (&SPI##x##_Resources); }                       \
+static int32_t        SPI##x##_PowerControl    (ARM_POWER_STATE state)                             { return SPI_PowerControl (state, &SPI##x##_Resources); }                \
+static int32_t        SPI##x##_Send            (const void *data, uint32_t num)                    { return SPI_Send (data, num, &SPI##x##_Resources); }                    \
+static int32_t        SPI##x##_Receive         (void *data, uint32_t num)                          { return SPI_Receive (data, num, &SPI##x##_Resources); }                 \
+static int32_t        SPI##x##_Transfer        (const void *data_out, void *data_in, uint32_t num) { return SPI_Transfer (data_out, data_in, num, &SPI##x##_Resources); }   \
+static uint32_t       SPI##x##_GetDataCount    (void)                                              { return SPI_GetDataCount (&SPI##x##_Resources); }                       \
+static int32_t        SPI##x##_Control         (uint32_t control, uint32_t arg)                    { return SPI_Control (control, arg, &SPI##x##_Resources); }              \
+static ARM_SPI_STATUS SPI##x##_GetStatus       (void)                                              { return SPI_GetStatus (&SPI##x##_Resources); }                          \
+       void           SPI##x##_IRQHandler      (void)                                              { SPI_IRQHandler(&SPI##x##_Resources); }                                 \
+                                                                                                                                                                            \
+ARM_DRIVER_SPI Driver_SPI##x = {        \
+  SPIx_GetVersion,                      \
+  SPIx_GetCapabilities,                 \
+  SPI##x##_Initialize,                  \
+  SPI##x##_Uninitialize,                \
+  SPI##x##_PowerControl,                \
+  SPI##x##_Send,                        \
+  SPI##x##_Receive,                     \
+  SPI##x##_Transfer,                    \
+  SPI##x##_GetDataCount,                \
+  SPI##x##_Control,                     \
+  SPI##x##_GetStatus                    \
+}                                       \
+
+
+#define SPIx_TX_DMA_ALLOC(x)                                                                         \
+void SPI##x##_TX_DMA_Handler  (void)           { DMA_IRQ_Handle(&SPI##x##_TX_DMA); }                 \
+void SPI##x##_TX_DMA_Complete (uint32_t event) { SPI_TX_DMA_Complete(event, &SPI##x##_Resources); }  \
+
+#define SPIx_RX_DMA_ALLOC(x)                                                                         \
+void SPI##x##_RX_DMA_Handler  (void)           { DMA_IRQ_Handle(&SPI##x##_RX_DMA); }                 \
+void SPI##x##_RX_DMA_Complete (uint32_t event) { SPI_RX_DMA_Complete(event, &SPI##x##_Resources); }  \
+
+
 /* SPI1 configuration definitions */
 #if (RTE_SPI1 == 1)
 

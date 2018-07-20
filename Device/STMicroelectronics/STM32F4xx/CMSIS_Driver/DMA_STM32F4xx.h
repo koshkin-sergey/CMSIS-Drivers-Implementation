@@ -165,14 +165,12 @@ typedef enum {
 } DMA_PerBurst_t;
 
 typedef struct DMA_StreamConfig_s {
-  DMA_Channel_t Channel;            /*!< Specifies the channel used for the specified stream.                             */
   DMA_Dir_t Direction;              /*!< Specifies the data transfer direction.                                           */
   DMA_PerInc_t PerInc;              /*!< Specifies whether the Peripheral address register should be incremented or not.  */
   DMA_MemInc_t MemInc;              /*!< Specifies whether the memory address register should be incremented or not.      */
   DMA_PerDataAlign_t PerDataAlign;  /*!< Specifies the Peripheral data width.                                             */
   DMA_MemDataAlign_t MemDataAlign;  /*!< Specifies the Memory data width.                                                 */
   DMA_Mode_t Mode;                  /*!< Specifies the operation mode.                                                    */
-  DMA_Priority_t Priority;          /*!< Specifies the software priority.                                                 */
   DMA_FIFOMode_t FIFOMode;          /*!< Specifies if the FIFO mode or Direct mode will be used for the specified stream. */
   DMA_FIFOThrhld_t FIFOThreshold;   /*!< Specifies the FIFO threshold level.                                              */
   DMA_MemBurst_t MemBurst;          /*!< Specifies the Burst transfer configuration for the memory transfers.             */
@@ -229,7 +227,6 @@ void DMA_Uninitialize(DMA_Resources_t *res);
  * @fn          void DMA_StreamConfig(const DMA_Resources_t *res)
  * @brief       Configure the DMA Stream
  * @param[in]   res  Pointer to DMA resources
- * @param[in]   cfg  Pointer to Config structure
  */
 void DMA_StreamConfig(const DMA_Resources_t *res);
 

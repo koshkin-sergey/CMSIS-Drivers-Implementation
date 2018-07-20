@@ -20,7 +20,7 @@
 /*******************************************************************************
  *  includes
  ******************************************************************************/
- 
+
 #include "SPI_STM32F4xx.h"
 
 /*******************************************************************************
@@ -738,10 +738,10 @@ void PinConfig(const SPI_PIN *io, const GPIO_PIN_CFG_t *pin_cfg)
   if (GPIO_GetPortClockState(io->port) == false)
     GPIO_PortClock(io->port, GPIO_PORT_CLK_ENABLE);
 
-  GPIO_PinConfig(io->port, io->pin, pin_cfg);
-
   if (pin_cfg->mode == GPIO_MODE_AF_PP || pin_cfg->mode == GPIO_MODE_AF_OD)
     GPIO_AFConfig(io->port, io->pin, io->func);
+
+  GPIO_PinConfig(io->port, io->pin, pin_cfg);
 }
 
 /**
@@ -750,6 +750,7 @@ void PinConfig(const SPI_PIN *io, const GPIO_PIN_CFG_t *pin_cfg)
  * @param[in]   info
  * @return
  */
+static
 bool isData16bit(const SPI_INFO *info)
 {
   return ((info->mode & ARM_SPI_DATA_BITS_Msk) == ARM_SPI_DATA_BITS(16U));
@@ -989,10 +990,8 @@ int32_t SPI_PowerControl(ARM_POWER_STATE state, SPI_RESOURCES *spi)
       if (spi->tx_dma != NULL) {
         DMA_StreamConfig_t *cfg = &spi->tx_dma->handle->config;
 
-        cfg->Channel   = spi->tx_dma->channel;
         cfg->Direction = DMA_DIR_MEM_TO_PER;
         cfg->Mode      = DMA_MODE_NORMAL;
-        cfg->Priority  = spi->tx_dma->priority;
         cfg->FIFOMode  = DMA_FIFOMODE_DISABLE;
         cfg->MemBurst  = DMA_MBURST_SINGLE;
         cfg->PerBurst  = DMA_PBURST_SINGLE;
@@ -1003,10 +1002,8 @@ int32_t SPI_PowerControl(ARM_POWER_STATE state, SPI_RESOURCES *spi)
       if (spi->rx_dma != NULL) {
         DMA_StreamConfig_t *cfg = &spi->rx_dma->handle->config;
 
-        cfg->Channel   = spi->rx_dma->channel;
         cfg->Direction = DMA_DIR_PER_TO_MEM;
         cfg->Mode      = DMA_MODE_NORMAL;
-        cfg->Priority  = spi->rx_dma->priority;
         cfg->FIFOMode  = DMA_FIFOMODE_DISABLE;
         cfg->MemBurst  = DMA_MBURST_SINGLE;
         cfg->PerBurst  = DMA_PBURST_SINGLE;
@@ -1795,643 +1792,75 @@ void SPI_RX_DMA_Complete(uint32_t event, SPI_RESOURCES *spi)
 #endif  // SPI_DMA_RX
 
 #if defined(USE_SPI1)
-/* SPI1 Driver wrapper functions */
+  SPIx_EXPORT_DRIVER(1);
 
-static
-int32_t SPI1_Initialize(ARM_SPI_SignalEvent_t cb_event)
-{
-  return SPI_Initialize(cb_event, &SPI1_Resources);
-}
+  #ifdef SPI1_TX_DMA_Stream
+    SPIx_TX_DMA_ALLOC(1);
+  #endif // SPI1_TX_DMA_Stream
 
-static
-int32_t SPI1_Uninitialize(void)
-{
-  return SPI_Uninitialize(&SPI1_Resources);
-}
-
-static
-int32_t SPI1_PowerControl(ARM_POWER_STATE state)
-{
-  return SPI_PowerControl(state, &SPI1_Resources);
-}
-
-static
-int32_t SPI1_Send(const void *data, uint32_t num)
-{
-  return SPI_Send(data, num, &SPI1_Resources);
-}
-
-static
-int32_t SPI1_Receive(void *data, uint32_t num)
-{
-  return SPI_Receive(data, num, &SPI1_Resources);
-}
-
-static
-int32_t SPI1_Transfer(const void *data_out, void *data_in, uint32_t num)
-{
-  return SPI_Transfer(data_out, data_in, num, &SPI1_Resources);
-}
-
-static
-uint32_t SPI1_GetDataCount(void)
-{
-  return SPI_GetDataCount(&SPI1_Resources);
-}
-
-static
-int32_t SPI1_Control(uint32_t control, uint32_t arg)
-{
-  return SPI_Control(control, arg, &SPI1_Resources);
-}
-
-static
-ARM_SPI_STATUS SPI1_GetStatus(void)
-{
-  return SPI_GetStatus(&SPI1_Resources);
-}
-
-void SPI1_IRQHandler(void)
-{
-  SPI_IRQHandler(&SPI1_Resources);
-}
-
-#ifdef SPI1_TX_DMA_Stream
-void SPI1_TX_DMA_Handler(void)
-{
-  DMA_IRQ_Handle(&SPI1_TX_DMA);
-}
-
-void SPI1_TX_DMA_Complete(uint32_t event)
-{
-  SPI_TX_DMA_Complete(event, &SPI1_Resources);
-}
-#endif // SPI1_TX_DMA_Stream
-
-#ifdef SPI1_RX_DMA_Stream
-void SPI1_RX_DMA_Handler(void)
-{
-  DMA_IRQ_Handle(&SPI1_RX_DMA);
-}
-
-void SPI1_RX_DMA_Complete(uint32_t event)
-{
-  SPI_RX_DMA_Complete(event, &SPI1_Resources);
-}
-#endif // SPI1_RX_DMA_Stream
-
+  #ifdef SPI1_RX_DMA_Stream
+    SPIx_RX_DMA_ALLOC(1);
+  #endif // SPI1_RX_DMA_Stream
 #endif  /* USE_SPI1 */
 
 #if defined(USE_SPI2)
-/* SPI2 Driver wrapper functions */
+  SPIx_EXPORT_DRIVER(2);
 
-static
-int32_t SPI2_Initialize(ARM_SPI_SignalEvent_t cb_event)
-{
-  return SPI_Initialize(cb_event, &SPI2_Resources);
-}
+  #ifdef SPI2_TX_DMA_Stream
+    SPIx_TX_DMA_ALLOC(2);
+  #endif
 
-static
-int32_t SPI2_Uninitialize(void)
-{
-  return SPI_Uninitialize(&SPI2_Resources);
-}
-
-static
-int32_t SPI2_PowerControl(ARM_POWER_STATE state)
-{
-  return SPI_PowerControl(state, &SPI2_Resources);
-}
-
-static
-int32_t SPI2_Send(const void *data, uint32_t num)
-{
-  return SPI_Send(data, num, &SPI2_Resources);
-}
-
-static
-int32_t SPI2_Receive(void *data, uint32_t num)
-{
-  return SPI_Receive(data, num, &SPI2_Resources);
-}
-
-static
-int32_t SPI2_Transfer(const void *data_out, void *data_in, uint32_t num)
-{
-  return SPI_Transfer(data_out, data_in, num, &SPI2_Resources);
-}
-
-static
-uint32_t SPI2_GetDataCount(void)
-{
-  return SPI_GetDataCount(&SPI2_Resources);
-}
-
-static
-int32_t SPI2_Control(uint32_t control, uint32_t arg)
-{
-  return SPI_Control(control, arg, &SPI2_Resources);
-}
-
-static
-ARM_SPI_STATUS SPI2_GetStatus(void)
-{
-  return SPI_GetStatus(&SPI2_Resources);
-}
-
-void SPI2_IRQHandler(void)
-{
-  SPI_IRQHandler(&SPI2_Resources);
-}
-
-#ifdef SPI2_TX_DMA_Stream
-void SPI2_TX_DMA_Handler(void)
-{
-  DMA_IRQ_Handle(&SPI2_TX_DMA);
-}
-
-void SPI2_TX_DMA_Complete(uint32_t event)
-{
-  SPI_TX_DMA_Complete(event, &SPI2_Resources);
-}
-#endif // SPI2_TX_DMA_Stream
-
-#ifdef SPI2_RX_DMA_Stream
-void SPI2_RX_DMA_Handler(void)
-{
-  DMA_IRQ_Handle(&SPI2_RX_DMA);
-}
-
-void SPI2_RX_DMA_Complete(uint32_t event)
-{
-  SPI_RX_DMA_Complete(event, &SPI2_Resources);
-}
-#endif // SPI2_RX_DMA_Stream
-
+  #ifdef SPI2_RX_DMA_Stream
+    SPIx_RX_DMA_ALLOC(2);
+  #endif
 #endif  /* USE_SPI2 */
 
 #if defined(USE_SPI3)
-/* SPI3 Driver wrapper functions */
+  SPIx_EXPORT_DRIVER(3);
 
-static
-int32_t SPI3_Initialize(ARM_SPI_SignalEvent_t cb_event)
-{
-  return SPI_Initialize(cb_event, &SPI3_Resources);
-}
+  #ifdef SPI3_TX_DMA_Stream
+    SPIx_TX_DMA_ALLOC(3);
+  #endif
 
-static
-int32_t SPI3_Uninitialize(void)
-{
-  return SPI_Uninitialize(&SPI3_Resources);
-}
-
-static
-int32_t SPI3_PowerControl(ARM_POWER_STATE state)
-{
-  return SPI_PowerControl(state, &SPI3_Resources);
-}
-
-static
-int32_t SPI3_Send(const void *data, uint32_t num)
-{
-  return SPI_Send(data, num, &SPI3_Resources);
-}
-
-static
-int32_t SPI3_Receive(void *data, uint32_t num)
-{
-  return SPI_Receive(data, num, &SPI3_Resources);
-}
-
-static
-int32_t SPI3_Transfer(const void *data_out, void *data_in, uint32_t num)
-{
-  return SPI_Transfer(data_out, data_in, num, &SPI3_Resources);
-}
-
-static
-uint32_t SPI3_GetDataCount(void)
-{
-  return SPI_GetDataCount(&SPI3_Resources);
-}
-
-static
-int32_t SPI3_Control(uint32_t control, uint32_t arg)
-{
-  return SPI_Control(control, arg, &SPI3_Resources);
-}
-
-static
-ARM_SPI_STATUS SPI3_GetStatus(void)
-{
-  return SPI_GetStatus(&SPI3_Resources);
-}
-
-void SPI3_IRQHandler(void)
-{
-  SPI_IRQHandler(&SPI3_Resources);
-}
-
-#ifdef SPI3_TX_DMA_Stream
-void SPI3_TX_DMA_Handler(void)
-{
-  DMA_IRQ_Handle(&SPI3_TX_DMA);
-}
-
-void SPI3_TX_DMA_Complete(uint32_t event)
-{
-  SPI_TX_DMA_Complete(event, &SPI3_Resources);
-}
-#endif // SPI3_TX_DMA_Stream
-
-#ifdef SPI3_RX_DMA_Stream
-void SPI3_RX_DMA_Handler(void)
-{
-  DMA_IRQ_Handle(&SPI3_RX_DMA);
-}
-
-void SPI3_RX_DMA_Complete(uint32_t event)
-{
-  SPI_RX_DMA_Complete(event, &SPI3_Resources);
-}
-#endif // SPI3_RX_DMA_Stream
-
+  #ifdef SPI3_RX_DMA_Stream
+    SPIx_RX_DMA_ALLOC(3);
+  #endif
 #endif  /* USE_SPI3 */
 
 #if defined(USE_SPI4)
-/* SPI4 Driver wrapper functions */
+  SPIx_EXPORT_DRIVER(4);
 
-static
-int32_t SPI4_Initialize(ARM_SPI_SignalEvent_t cb_event)
-{
-  return SPI_Initialize(cb_event, &SPI4_Resources);
-}
+  #ifdef SPI4_TX_DMA_Stream
+    SPIx_TX_DMA_ALLOC(4);
+  #endif
 
-static
-int32_t SPI4_Uninitialize(void)
-{
-  return SPI_Uninitialize(&SPI4_Resources);
-}
-
-static
-int32_t SPI4_PowerControl(ARM_POWER_STATE state)
-{
-  return SPI_PowerControl(state, &SPI4_Resources);
-}
-
-static
-int32_t SPI4_Send(const void *data, uint32_t num)
-{
-  return SPI_Send(data, num, &SPI4_Resources);
-}
-
-static
-int32_t SPI4_Receive(void *data, uint32_t num)
-{
-  return SPI_Receive(data, num, &SPI4_Resources);
-}
-
-static
-int32_t SPI4_Transfer(const void *data_out, void *data_in, uint32_t num)
-{
-  return SPI_Transfer(data_out, data_in, num, &SPI4_Resources);
-}
-
-static
-uint32_t SPI4_GetDataCount(void)
-{
-  return SPI_GetDataCount(&SPI4_Resources);
-}
-
-static
-int32_t SPI4_Control(uint32_t control, uint32_t arg)
-{
-  return SPI_Control(control, arg, &SPI4_Resources);
-}
-
-static
-ARM_SPI_STATUS SPI4_GetStatus(void)
-{
-  return SPI_GetStatus(&SPI4_Resources);
-}
-
-void SPI4_IRQHandler(void)
-{
-  SPI_IRQHandler(&SPI4_Resources);
-}
-
-#ifdef SPI4_TX_DMA_Stream
-void SPI4_TX_DMA_Handler(void)
-{
-  DMA_IRQ_Handle(&SPI4_TX_DMA);
-}
-
-void SPI4_TX_DMA_Complete(uint32_t event)
-{
-  SPI_TX_DMA_Complete(event, &SPI4_Resources);
-}
-#endif // SPI4_TX_DMA_Stream
-
-#ifdef SPI4_RX_DMA_Stream
-void SPI4_RX_DMA_Handler(void)
-{
-  DMA_IRQ_Handle(&SPI4_RX_DMA);
-}
-
-void SPI4_RX_DMA_Complete(uint32_t event)
-{
-  SPI_RX_DMA_Complete(event, &SPI4_Resources);
-}
-#endif // SPI4_RX_DMA_Stream
-
+  #ifdef SPI4_RX_DMA_Stream
+    SPIx_RX_DMA_ALLOC(4);
+  #endif
 #endif  /* USE_SPI4 */
 
 #if defined(USE_SPI5)
-/* SPI5 Driver wrapper functions */
+  SPIx_EXPORT_DRIVER(5);
 
-static
-int32_t SPI5_Initialize(ARM_SPI_SignalEvent_t cb_event)
-{
-  return SPI_Initialize(cb_event, &SPI5_Resources);
-}
+  #ifdef SPI5_TX_DMA_Stream
+    SPIx_TX_DMA_ALLOC(5);
+  #endif
 
-static
-int32_t SPI5_Uninitialize(void)
-{
-  return SPI_Uninitialize(&SPI5_Resources);
-}
-
-static
-int32_t SPI5_PowerControl(ARM_POWER_STATE state)
-{
-  return SPI_PowerControl(state, &SPI5_Resources);
-}
-
-static
-int32_t SPI5_Send(const void *data, uint32_t num)
-{
-  return SPI_Send(data, num, &SPI5_Resources);
-}
-
-static
-int32_t SPI5_Receive(void *data, uint32_t num)
-{
-  return SPI_Receive(data, num, &SPI5_Resources);
-}
-
-static
-int32_t SPI5_Transfer(const void *data_out, void *data_in, uint32_t num)
-{
-  return SPI_Transfer(data_out, data_in, num, &SPI5_Resources);
-}
-
-static
-uint32_t SPI5_GetDataCount(void)
-{
-  return SPI_GetDataCount(&SPI5_Resources);
-}
-
-static
-int32_t SPI5_Control(uint32_t control, uint32_t arg)
-{
-  return SPI_Control(control, arg, &SPI5_Resources);
-}
-
-static
-ARM_SPI_STATUS SPI5_GetStatus(void)
-{
-  return SPI_GetStatus(&SPI5_Resources);
-}
-
-void SPI5_IRQHandler(void)
-{
-  SPI_IRQHandler(&SPI5_Resources);
-}
-
-#ifdef SPI5_TX_DMA_Stream
-void SPI5_TX_DMA_Handler(void)
-{
-  DMA_IRQ_Handle(&SPI5_TX_DMA);
-}
-
-void SPI5_TX_DMA_Complete(uint32_t event)
-{
-  SPI_TX_DMA_Complete(event, &SPI5_Resources);
-}
-#endif // SPI5_TX_DMA_Stream
-
-#ifdef SPI5_RX_DMA_Stream
-void SPI5_RX_DMA_Handler(void)
-{
-  DMA_IRQ_Handle(&SPI5_RX_DMA);
-}
-
-void SPI5_RX_DMA_Complete(uint32_t event)
-{
-  SPI_RX_DMA_Complete(event, &SPI5_Resources);
-}
-#endif // SPI5_RX_DMA_Stream
-
+  #ifdef SPI5_RX_DMA_Stream
+    SPIx_RX_DMA_ALLOC(5);
+  #endif
 #endif  /* USE_SPI5 */
 
 #if defined(USE_SPI6)
-/* SPI6 Driver wrapper functions */
+  SPIx_EXPORT_DRIVER(6);
 
-static
-int32_t SPI6_Initialize(ARM_SPI_SignalEvent_t cb_event)
-{
-  return SPI_Initialize(cb_event, &SPI6_Resources);
-}
+  #ifdef SPI6_TX_DMA_Stream
+    SPIx_TX_DMA_ALLOC(6);
+  #endif
 
-static
-int32_t SPI6_Uninitialize(void)
-{
-  return SPI_Uninitialize(&SPI6_Resources);
-}
-
-static
-int32_t SPI6_PowerControl(ARM_POWER_STATE state)
-{
-  return SPI_PowerControl(state, &SPI6_Resources);
-}
-
-static
-int32_t SPI6_Send(const void *data, uint32_t num)
-{
-  return SPI_Send(data, num, &SPI6_Resources);
-}
-
-static
-int32_t SPI6_Receive(void *data, uint32_t num)
-{
-  return SPI_Receive(data, num, &SPI6_Resources);
-}
-
-static
-int32_t SPI6_Transfer(const void *data_out, void *data_in, uint32_t num)
-{
-  return SPI_Transfer(data_out, data_in, num, &SPI6_Resources);
-}
-
-static
-uint32_t SPI6_GetDataCount(void)
-{
-  return SPI_GetDataCount(&SPI6_Resources);
-}
-
-static
-int32_t SPI6_Control(uint32_t control, uint32_t arg)
-{
-  return SPI_Control(control, arg, &SPI6_Resources);
-}
-
-static
-ARM_SPI_STATUS SPI6_GetStatus(void)
-{
-  return SPI_GetStatus(&SPI6_Resources);
-}
-
-void SPI6_IRQHandler(void)
-{
-  SPI_IRQHandler(&SPI6_Resources);
-}
-
-#ifdef SPI6_TX_DMA_Stream
-void SPI6_TX_DMA_Handler(void)
-{
-  DMA_IRQ_Handle(&SPI6_TX_DMA);
-}
-
-void SPI6_TX_DMA_Complete(uint32_t event)
-{
-  SPI_TX_DMA_Complete(event, &SPI6_Resources);
-}
-#endif // SPI6_TX_DMA_Stream
-
-#ifdef SPI6_RX_DMA_Stream
-void SPI6_RX_DMA_Handler(void)
-{
-  DMA_IRQ_Handle(&SPI6_RX_DMA);
-}
-
-void SPI6_RX_DMA_Complete(uint32_t event)
-{
-  SPI_RX_DMA_Complete(event, &SPI6_Resources);
-}
-#endif // SPI6_RX_DMA_Stream
-
-#endif  /* USE_SPI6 */
-
-/*******************************************************************************
- *  global variable definitions  (scope: module-exported)
- ******************************************************************************/
-
-#if defined(USE_SPI1)
-
-ARM_DRIVER_SPI Driver_SPI1 = {
-  SPIx_GetVersion,
-  SPIx_GetCapabilities,
-  SPI1_Initialize,
-  SPI1_Uninitialize,
-  SPI1_PowerControl,
-  SPI1_Send,
-  SPI1_Receive,
-  SPI1_Transfer,
-  SPI1_GetDataCount,
-  SPI1_Control,
-  SPI1_GetStatus
-};
-
-#endif  /* USE_SPI1 */
-
-#if defined(USE_SPI2)
-
-ARM_DRIVER_SPI Driver_SPI2 = {
-  SPIx_GetVersion,
-  SPIx_GetCapabilities,
-  SPI2_Initialize,
-  SPI2_Uninitialize,
-  SPI2_PowerControl,
-  SPI2_Send,
-  SPI2_Receive,
-  SPI2_Transfer,
-  SPI2_GetDataCount,
-  SPI2_Control,
-  SPI2_GetStatus
-};
-
-#endif  /* USE_SPI2 */
-
-#if defined(USE_SPI3)
-
-ARM_DRIVER_SPI Driver_SPI3 = {
-  SPIx_GetVersion,
-  SPIx_GetCapabilities,
-  SPI3_Initialize,
-  SPI3_Uninitialize,
-  SPI3_PowerControl,
-  SPI3_Send,
-  SPI3_Receive,
-  SPI3_Transfer,
-  SPI3_GetDataCount,
-  SPI3_Control,
-  SPI3_GetStatus
-};
-
-#endif  /* USE_SPI3 */
-
-#if defined(USE_SPI4)
-
-ARM_DRIVER_SPI Driver_SPI4 = {
-  SPIx_GetVersion,
-  SPIx_GetCapabilities,
-  SPI4_Initialize,
-  SPI4_Uninitialize,
-  SPI4_PowerControl,
-  SPI4_Send,
-  SPI4_Receive,
-  SPI4_Transfer,
-  SPI4_GetDataCount,
-  SPI4_Control,
-  SPI4_GetStatus
-};
-
-#endif  /* USE_SPI4 */
-
-#if defined(USE_SPI5)
-
-ARM_DRIVER_SPI Driver_SPI5 = {
-  SPIx_GetVersion,
-  SPIx_GetCapabilities,
-  SPI5_Initialize,
-  SPI5_Uninitialize,
-  SPI5_PowerControl,
-  SPI5_Send,
-  SPI5_Receive,
-  SPI5_Transfer,
-  SPI5_GetDataCount,
-  SPI5_Control,
-  SPI5_GetStatus
-};
-
-#endif  /* USE_SPI5 */
-
-#if defined(USE_SPI6)
-
-ARM_DRIVER_SPI Driver_SPI6 = {
-  SPIx_GetVersion,
-  SPIx_GetCapabilities,
-  SPI6_Initialize,
-  SPI6_Uninitialize,
-  SPI6_PowerControl,
-  SPI6_Send,
-  SPI6_Receive,
-  SPI6_Transfer,
-  SPI6_GetDataCount,
-  SPI6_Control,
-  SPI6_GetStatus
-};
-
+  #ifdef SPI6_RX_DMA_Stream
+    SPIx_RX_DMA_ALLOC(6);
+  #endif
 #endif  /* USE_SPI6 */
 
 /* ----------------------------- End of file ---------------------------------*/

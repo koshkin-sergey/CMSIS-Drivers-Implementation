@@ -68,11 +68,11 @@
 #define RCC_SYSCLK_DIV256               RCC_CFGR_HPRE_DIV256
 #define RCC_SYSCLK_DIV512               RCC_CFGR_HPRE_DIV512
 
-#define RCC_HCLK_DIV1                   RCC_CFGR_PPRE1_DIV1
-#define RCC_HCLK_DIV2                   RCC_CFGR_PPRE1_DIV2
-#define RCC_HCLK_DIV4                   RCC_CFGR_PPRE1_DIV4
-#define RCC_HCLK_DIV8                   RCC_CFGR_PPRE1_DIV8
-#define RCC_HCLK_DIV16                  RCC_CFGR_PPRE1_DIV16
+#define RCC_HCLK_DIV1                   (0U)
+#define RCC_HCLK_DIV2                   (4U)
+#define RCC_HCLK_DIV4                   (5U)
+#define RCC_HCLK_DIV8                   (6U)
+#define RCC_HCLK_DIV16                  (7U)
 
 #define FLASH_LATENCY_0                 FLASH_ACR_LATENCY_0WS
 #define FLASH_LATENCY_1                 FLASH_ACR_LATENCY_1WS
@@ -99,7 +99,7 @@ typedef enum {
   RCC_FREQ_HSI,
   RCC_FREQ_HSE,
   RCC_FREQ_SYSCLK,
-  RCC_FREQ_HCLK,
+  RCC_FREQ_AHB,
   RCC_FREQ_APB1,
   RCC_FREQ_APB2,
   RCC_FREQ_Reserved = 0x7FFFFFFF
@@ -174,19 +174,19 @@ uint32_t RCC_I2SPLL_Config(uint32_t plln, uint32_t pllr);
 
 /**
  * @fn          void RCC_EnablePeriph(RCC_Periph_t *periph)
- * @param[out]  periph
+ * @param[in]   periph
  */
 void RCC_EnablePeriph(const RCC_Periph_t *periph);
 
 /**
  * @fn          void RCC_DisablePeriph(RCC_Periph_t *periph)
- * @param[out]  periph
+ * @param[in]   periph
  */
 void RCC_DisablePeriph(const RCC_Periph_t *periph);
 
 /**
  * @fn          void RCC_ResetPeriph(RCC_Periph_t *periph)
- * @param[out]  periph
+ * @param[in]   periph
  */
 void RCC_ResetPeriph(const RCC_Periph_t *periph);
 

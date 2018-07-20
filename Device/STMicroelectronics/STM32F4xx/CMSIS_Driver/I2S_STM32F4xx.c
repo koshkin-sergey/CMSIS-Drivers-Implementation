@@ -20,7 +20,7 @@
 /*******************************************************************************
  *  includes
  ******************************************************************************/
- 
+
 #include "I2S_STM32F4xx.h"
 
 /*******************************************************************************
@@ -424,14 +424,12 @@ int32_t I2S_PowerControl(ARM_POWER_STATE state, I2S_RESOURCES *i2s)
       if (i2s->tx_dma != NULL) {
         DMA_StreamConfig_t *cfg = &i2s->tx_dma->handle->config;
 
-        cfg->Channel      = i2s->tx_dma->channel;
         cfg->Direction    = DMA_DIR_MEM_TO_PER;
         cfg->PerInc       = DMA_PINC_DISABLE;
         cfg->MemInc       = DMA_MINC_ENABLE;
         cfg->PerDataAlign = DMA_PDATAALIGN_HALFWORD;
         cfg->MemDataAlign = DMA_MDATAALIGN_HALFWORD;
         cfg->Mode         = DMA_MODE_NORMAL;
-        cfg->Priority     = i2s->tx_dma->priority;
         cfg->FIFOMode     = DMA_FIFOMODE_DISABLE;
         cfg->MemBurst     = DMA_MBURST_SINGLE;
         cfg->PerBurst     = DMA_PBURST_SINGLE;
@@ -445,14 +443,12 @@ int32_t I2S_PowerControl(ARM_POWER_STATE state, I2S_RESOURCES *i2s)
       if (i2s->rx_dma != NULL) {
         DMA_StreamConfig_t *cfg = &i2s->rx_dma->handle->config;
 
-        cfg->Channel      = i2s->rx_dma->channel;
         cfg->Direction    = DMA_DIR_PER_TO_MEM;
         cfg->PerInc       = DMA_PINC_DISABLE;
         cfg->MemInc       = DMA_MINC_ENABLE;
         cfg->PerDataAlign = DMA_PDATAALIGN_HALFWORD;
         cfg->MemDataAlign = DMA_MDATAALIGN_HALFWORD;
         cfg->Mode         = DMA_MODE_NORMAL;
-        cfg->Priority     = i2s->rx_dma->priority;
         cfg->FIFOMode     = DMA_FIFOMODE_DISABLE;
         cfg->MemBurst     = DMA_MBURST_SINGLE;
         cfg->PerBurst     = DMA_PBURST_SINGLE;

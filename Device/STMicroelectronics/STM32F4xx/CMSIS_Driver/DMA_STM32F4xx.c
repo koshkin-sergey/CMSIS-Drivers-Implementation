@@ -139,7 +139,6 @@ void DMA_Uninitialize(DMA_Resources_t *res)
  * @fn          void DMA_StreamConfig(const DMA_Resources_t *res)
  * @brief       Configure the DMA Stream
  * @param[in]   res  Pointer to DMA resources
- * @param[in]   cfg  Pointer to Config structure
  */
 void DMA_StreamConfig(const DMA_Resources_t *res)
 {
@@ -163,8 +162,8 @@ void DMA_StreamConfig(const DMA_Resources_t *res)
   val = (stream->CR & (DMA_SxCR_TCIE | DMA_SxCR_HTIE | DMA_SxCR_TEIE | DMA_SxCR_DMEIE));
 
   /* Prepare the DMA Stream configuration */
-  val |= (cfg->Channel      | cfg->Direction    | cfg->PerInc | cfg->MemInc |
-          cfg->PerDataAlign | cfg->MemDataAlign | cfg->Mode   | cfg->Priority);
+  val |= (res->channel      | cfg->Direction    | cfg->PerInc | cfg->MemInc |
+          cfg->PerDataAlign | cfg->MemDataAlign | cfg->Mode   | res->priority);
 
   /* The memory burst and peripheral burst are not used when the FIFO is disabled */
   if(cfg->FIFOMode == DMA_FIFOMODE_ENABLE) {
@@ -249,30 +248,32 @@ void DMA_StreamDisable(DMA_Resources_t *res)
 void DMA_IRQ_Handle(DMA_Resources_t *res)
 {
   uint32_t event = 0U, isr, cr;
-  DMA_Base_Reg_t *dma = res->handle->dma_reg;
+  DMA_Handle_t *handle = res->handle;
+  DMA_Base_Reg_t *dma = handle->dma_reg;
+  DMA_Stream_TypeDef *stream = res->stream;
 
-  cr = res->stream->CR;
-  isr = dma->ISR >> res->handle->bit_offset;
+  cr = stream->CR;
+  isr = dma->ISR >> handle->bit_offset;
 
   if (isr & (DMA_FLAG_FEIF | DMA_FLAG_DMEIF | DMA_FLAG_TEIF)) {
     /* FIFO Error Interrupt management */
     if (isr & DMA_FLAG_FEIF) {
       /* Clear FIFO Error Interrupt flag */
-      dma->IFCR = DMA_FLAG_FEIF << res->handle->bit_offset;
+      dma->IFCR = DMA_FLAG_FEIF << handle->bit_offset;
       event |= DMA_EVENT_FIFO_ERROR;
     }
 
     /* Direct Mode Error Interrupt management */
     if (isr & DMA_FLAG_DMEIF) {
       /* Clear Direct Mode Error Interrupt flag */
-      dma->IFCR = DMA_FLAG_DMEIF << res->handle->bit_offset;
+      dma->IFCR = DMA_FLAG_DMEIF << handle->bit_offset;
       event |= DMA_EVENT_DIRECT_MODE_ERROR;
     }
-    
+
     /* Transfer Error Interrupt management */
     if (isr & DMA_FLAG_TEIF) {
       /* Clear Transfer Error Interrupt flag */
-      dma->IFCR = DMA_FLAG_TEIF << res->handle->bit_offset;
+      dma->IFCR = DMA_FLAG_TEIF << handle->bit_offset;
       event |= DMA_EVENT_TRANSFER_ERROR;
     }
   }
@@ -280,37 +281,37 @@ void DMA_IRQ_Handle(DMA_Resources_t *res)
   /* Half Transfer Complete Interrupt management */
   if ((cr & DMA_SxCR_HTIE) && (isr & DMA_FLAG_HTIF)) {
     /* Clear Half Transfer Complete Interrupt flag */
-    dma->IFCR = DMA_FLAG_HTIF << res->handle->bit_offset;
+    dma->IFCR = DMA_FLAG_HTIF << handle->bit_offset;
 
     if (!(cr & DMA_SxCR_CIRC))
-      res->stream->CR &= ~DMA_SxCR_HTIE;
+      stream->CR &= ~DMA_SxCR_HTIE;
 
     event |= DMA_EVENT_HALF_TRANSFER_COMPLETE;
   }
 
   /* Transfer Complete Interrupt management */
   if ((cr & DMA_SxCR_TCIE) && (isr & DMA_FLAG_TCIF)) {
-    if (res->handle->state == DMA_STATE_ABORT) {
+    if (handle->state == DMA_STATE_ABORT) {
       /* Disable all the transfer interrupts */
-      res->stream->CR &= ~(DMA_SxCR_TCIE | DMA_SxCR_HTIE | DMA_SxCR_TEIE | DMA_SxCR_DMEIE);
-      res->stream->FCR &= ~DMA_SxFCR_FEIE;
+      stream->CR &= ~(DMA_SxCR_TCIE | DMA_SxCR_HTIE | DMA_SxCR_TEIE | DMA_SxCR_DMEIE);
+      stream->FCR &= ~DMA_SxFCR_FEIE;
 
       /* Clear all interrupt flags */
-      res->handle->dma_reg->IFCR = 0x3D << res->handle->bit_offset;
+      handle->dma_reg->IFCR = 0x3D << handle->bit_offset;
       /* Change the DMA state */
-      res->handle->state = DMA_STATE_READY;
+      handle->state = DMA_STATE_READY;
 
       event |= DMA_EVENT_TRANSFER_ABORT;
     }
     else {
       /* Clear Transfer Complete Interrupt flag */
-      dma->IFCR = DMA_FLAG_TCIF << res->handle->bit_offset;
+      dma->IFCR = DMA_FLAG_TCIF << handle->bit_offset;
 
       if (!(cr & DMA_SxCR_CIRC))
-        res->stream->CR &= ~DMA_SxCR_TCIE;
+        stream->CR &= ~DMA_SxCR_TCIE;
 
       /* Change the DMA state */
-      res->handle->state = DMA_STATE_READY;
+      handle->state = DMA_STATE_READY;
 
       event |= DMA_EVENT_TRANSFER_COMPLETE;
     }
