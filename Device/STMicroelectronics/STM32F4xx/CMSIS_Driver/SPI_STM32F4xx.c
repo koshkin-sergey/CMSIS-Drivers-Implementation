@@ -745,6 +745,28 @@ void PinConfig(const SPI_PIN *io, const GPIO_PIN_CFG_t *pin_cfg)
 }
 
 /**
+ *
+ * @return
+ */
+int32_t CalcPrescalerValue(SPI_RESOURCES *spi, uint32_t freq)
+{
+  int32_t val;
+
+  uint32_t pclk = RCC_GetFreq(spi->rcc.freq_domain);
+  for (val = 0; val < 8; val++) {
+    if (freq >= (pclk >> (val + 1)))
+      break;
+  }
+
+  if ((val == 8) || (freq < (pclk >> (val + 1)))) {
+    // Requested Bus Speed can not be configured
+    val = -1;
+  }
+
+  return (val);
+}
+
+/**
  * @fn          bool isData16bit(const SPI_INFO *info)
  * @brief
  * @param[in]   info
@@ -1362,7 +1384,8 @@ uint32_t SPI_GetDataCount(SPI_RESOURCES *spi)
 static
 int32_t SPI_Control(uint32_t control, uint32_t arg, SPI_RESOURCES *spi)
 {
-  uint32_t mode, val, pclk;
+  int32_t br;
+  uint32_t mode, val;
   uint32_t cr1, cr2;
   SPI_INFO *info = spi->info;
   SPI_TypeDef *reg = spi->reg;
@@ -1438,19 +1461,13 @@ int32_t SPI_Control(uint32_t control, uint32_t arg, SPI_RESOURCES *spi)
 
     case ARM_SPI_SET_BUS_SPEED:
       // Set SPI Bus Speed
-      pclk = RCC_GetFreq(spi->rcc.freq_domain);
-      for (val = 0U; val < 8U; val++) {
-        if (arg >= (pclk >> (val + 1U))) {
-          break;
-        }
-      }
-      if ((val == 8U) || (arg < (pclk >> (val + 1U)))) {
-        // Requested Bus Speed can not be configured
+      br = CalcPrescalerValue(spi, arg);
+      if (br < 0)
         return ARM_DRIVER_ERROR;
-      }
+
       // Disable SPI, update prescaler and enable SPI
       reg->CR1 &= ~SPI_CR1_SPE;
-      reg->CR1 = (reg->CR1 & ~SPI_CR1_BR) | (val << 3U);
+      reg->CR1 = (reg->CR1 & ~SPI_CR1_BR_Msk) | (br << SPI_CR1_BR_Pos);
       reg->CR1 |= SPI_CR1_SPE;
       return ARM_DRIVER_OK;
 
@@ -1639,17 +1656,13 @@ int32_t SPI_Control(uint32_t control, uint32_t arg, SPI_RESOURCES *spi)
   }
 
   // Set SPI Bus Speed
-  pclk = RCC_GetFreq(spi->rcc.freq_domain);
-  for (val = 0U; val < 8U; val++) {
-    if (arg >= (pclk >> (val + 1U)))
-      break;
+  if ((mode & ARM_SPI_CONTROL_Msk) == ARM_SPI_MODE_MASTER) {
+    br = CalcPrescalerValue(spi, arg);
+    if (br < 0)
+      return ARM_DRIVER_ERROR;
+    // Save prescaler value
+    cr1 |= (br << SPI_CR1_BR_Pos);
   }
-  if ((val == 8U) || (arg < (pclk >> (val + 1U)))) {
-    // Requested Bus Speed can not be configured
-    return ARM_DRIVER_ERROR;
-  }
-  // Save prescaler value
-  cr1 |= (val << 3U);
 
   info->mode = mode;
 

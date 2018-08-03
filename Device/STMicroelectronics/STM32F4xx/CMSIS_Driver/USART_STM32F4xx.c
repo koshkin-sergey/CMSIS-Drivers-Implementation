@@ -48,7 +48,7 @@ static const ARM_DRIVER_VERSION usart_driver_version = {
 };
 
 static const GPIO_PIN_CFG_t USART_pin_cfg_af = {
-    GPIO_MODE_AF_PP, GPIO_PULL_DISABLE, GPIO_SPEED_LOW
+    GPIO_MODE_AF_PP, GPIO_PULL_UP, GPIO_SPEED_LOW
 };
 
 static const GPIO_PIN_CFG_t USART_pin_cfg_input = {
@@ -2426,7 +2426,7 @@ ARM_DRIVER_USART Driver_USART1 = {
     USART1_Initialize,
     USART1_Uninitialize,
     USART1_PowerControl,
-    USART1_Send, 
+    USART1_Send,
     USART1_Receive,
     USART1_Transfer,
     USART1_GetTxCount,
@@ -2531,7 +2531,7 @@ ARM_DRIVER_USART Driver_USART2 = {
     USART2_Initialize,
     USART2_Uninitialize,
     USART2_PowerControl,
-    USART2_Send, 
+    USART2_Send,
     USART2_Receive,
     USART2_Transfer,
     USART2_GetTxCount,
@@ -2636,7 +2636,7 @@ ARM_DRIVER_USART Driver_USART3 = {
     USART3_Initialize,
     USART3_Uninitialize,
     USART3_PowerControl,
-    USART3_Send, 
+    USART3_Send,
     USART3_Receive,
     USART3_Transfer,
     USART3_GetTxCount,
@@ -2740,7 +2740,7 @@ ARM_DRIVER_USART Driver_USART4 = {
     USART4_Initialize,
     USART4_Uninitialize,
     USART4_PowerControl,
-    USART4_Send, 
+    USART4_Send,
     USART4_Receive,
     USART4_Transfer,
     USART4_GetTxCount,
@@ -2845,7 +2845,7 @@ ARM_DRIVER_USART Driver_USART5 = {
     USART5_Initialize,
     USART5_Uninitialize,
     USART5_PowerControl,
-    USART5_Send, 
+    USART5_Send,
     USART5_Receive,
     USART5_Transfer,
     USART5_GetTxCount,
@@ -2950,7 +2950,7 @@ ARM_DRIVER_USART Driver_USART6 = {
     USART6_Initialize,
     USART6_Uninitialize,
     USART6_PowerControl,
-    USART6_Send, 
+    USART6_Send,
     USART6_Receive,
     USART6_Transfer,
     USART6_GetTxCount,
@@ -3055,7 +3055,7 @@ ARM_DRIVER_USART Driver_USART7 = {
     USART7_Initialize,
     USART7_Uninitialize,
     USART7_PowerControl,
-    USART7_Send, 
+    USART7_Send,
     USART7_Receive,
     USART7_Transfer,
     USART7_GetTxCount,
@@ -3160,7 +3160,7 @@ ARM_DRIVER_USART Driver_USART8 = {
     USART8_Initialize,
     USART8_Uninitialize,
     USART8_PowerControl,
-    USART8_Send, 
+    USART8_Send,
     USART8_Receive,
     USART8_Transfer,
     USART8_GetTxCount,
@@ -3265,7 +3265,7 @@ ARM_DRIVER_USART Driver_USART9 = {
     USART9_Initialize,
     USART9_Uninitialize,
     USART9_PowerControl,
-    USART9_Send, 
+    USART9_Send,
     USART9_Receive,
     USART9_Transfer,
     USART9_GetTxCount,
@@ -3370,7 +3370,7 @@ ARM_DRIVER_USART Driver_USART10 = {
     USART10_Initialize,
     USART10_Uninitialize,
     USART10_PowerControl,
-    USART10_Send, 
+    USART10_Send,
     USART10_Receive,
     USART10_Transfer,
     USART10_GetTxCount,
