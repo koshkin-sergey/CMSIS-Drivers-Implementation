@@ -79,12 +79,7 @@ static I2C_RESOURCES I2C1_Resources = {
   },
   I2C1_EV_IRQn,
   I2C1_ER_IRQn,
-  {
-    &RCC->APB1ENR,
-    &RCC->APB1RSTR,
-    RCC_APB1ENR_I2C1EN,
-    RCC_FREQ_APB1
-  },
+  RCC_PERIPH_I2C1,
   &I2C1_Info,
 };
 #endif /* USE_I2C1 */
@@ -109,12 +104,7 @@ static I2C_RESOURCES I2C2_Resources = {
   },
   I2C2_EV_IRQn,
   I2C2_ER_IRQn,
-  {
-    &RCC->APB1ENR,
-    &RCC->APB1RSTR,
-    RCC_APB1ENR_I2C2EN,
-    RCC_FREQ_APB1
-  },
+  RCC_PERIPH_I2C2,
   &I2C2_Info,
 };
 #endif /* USE_I2C2 */
@@ -138,12 +128,7 @@ static I2C_RESOURCES I2C3_Resources = {
   },
   I2C3_EV_IRQn,
   I2C3_ER_IRQn,
-  {
-    &RCC->APB1ENR,
-    &RCC->APB1RSTR,
-    RCC_APB1ENR_I2C3EN,
-    RCC_FREQ_APB1
-  },
+  RCC_PERIPH_I2C3,
   &I2C3_Info,
 };
 #endif /* USE_I2C3 */
@@ -249,7 +234,7 @@ int32_t I2Cx_PowerControl(ARM_POWER_STATE state, I2C_RESOURCES *i2c)
   switch (state) {
     case ARM_POWER_OFF:
       /* Enable I2C clock */
-      RCC_EnablePeriph(&i2c->rcc);
+      RCC_EnablePeriph(i2c->rcc);
 
       /* Disable I2C peripheral */
       reg->CR1 = 0;
@@ -259,7 +244,7 @@ int32_t I2Cx_PowerControl(ARM_POWER_STATE state, I2C_RESOURCES *i2c)
       NVIC_DisableIRQ(i2c->er_irq_num);
 
       /* Disable peripheral clock */
-      RCC_DisablePeriph(&i2c->rcc);
+      RCC_DisablePeriph(i2c->rcc);
 
       info->status.busy             = 0U;
       info->status.mode             = 0U;
@@ -279,7 +264,7 @@ int32_t I2Cx_PowerControl(ARM_POWER_STATE state, I2C_RESOURCES *i2c)
         return ARM_DRIVER_OK;
 
       /* Enable I2C clock */
-      RCC_EnablePeriph(&i2c->rcc);
+      RCC_EnablePeriph(i2c->rcc);
 
       /* Clear and Enable I2C IRQ */
       NVIC_ClearPendingIRQ(i2c->ev_irq_num);
@@ -290,7 +275,7 @@ int32_t I2Cx_PowerControl(ARM_POWER_STATE state, I2C_RESOURCES *i2c)
       NVIC_EnableIRQ(i2c->er_irq_num);
 
       /* Reset the peripheral */
-      RCC_ResetPeriph(&i2c->rcc);
+      RCC_ResetPeriph(i2c->rcc);
 
       /* Enable event and error interrupts */
       reg->CR2 |= I2C_CR2_ITEVTEN | I2C_CR2_ITERREN;
@@ -356,7 +341,7 @@ int32_t I2Cx_Control(uint32_t control, uint32_t arg, I2C_RESOURCES *i2c)
     case ARM_I2C_BUS_SPEED:
     {
       uint32_t ccr, trise;
-      uint32_t pclk = RCC_GetFreq(i2c->rcc.freq_domain);
+      uint32_t pclk = RCC_GetPeriphFreq(i2c->rcc);
 
       switch (arg) {
         case ARM_I2C_BUS_SPEED_STANDARD:

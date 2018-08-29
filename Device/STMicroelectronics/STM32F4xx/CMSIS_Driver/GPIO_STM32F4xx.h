@@ -36,9 +36,9 @@
  ******************************************************************************/
 
 typedef enum {
-  GPIO_PORT_A   = 0,
-  GPIO_PORT_B   = 1,
-  GPIO_PORT_C   = 2,
+  GPIO_PORT_A,
+  GPIO_PORT_B,
+  GPIO_PORT_C,
 #if defined(STM32F401xC) || defined(STM32F401xE) ||                                                 \
     defined(STM32F405xx) || defined(STM32F415xx) || defined(STM32F407xx) || defined(STM32F417xx) || \
     defined(STM32F411xE) ||                                                                         \
@@ -46,22 +46,27 @@ typedef enum {
     defined(STM32F413xx) ||                                                                         \
     defined(STM32F423xx) || defined(STM32F427xx) || defined(STM32F429xx) || defined(STM32F437xx) || \
     defined(STM32F439xx) || defined(STM32F446xx) || defined(STM32F469xx) || defined(STM32F479xx)
-  GPIO_PORT_D   = 3,
-  GPIO_PORT_E   = 4,
+  GPIO_PORT_D,
+  GPIO_PORT_E,
 #endif
 #if defined(STM32F405xx) || defined(STM32F415xx) || defined(STM32F407xx) || defined(STM32F417xx) || \
     defined(STM32F412Cx) || defined(STM32F412Rx) || defined(STM32F412Vx) || defined(STM32F412Zx) || \
     defined(STM32F413xx) ||                                                                         \
     defined(STM32F423xx) || defined(STM32F427xx) || defined(STM32F429xx) || defined(STM32F437xx) || \
     defined(STM32F439xx) || defined(STM32F446xx) || defined(STM32F469xx) || defined(STM32F479xx)
-  GPIO_PORT_F   = 5,
-  GPIO_PORT_G   = 6,
+  GPIO_PORT_F,
+  GPIO_PORT_G,
 #endif
-  GPIO_PORT_H   = 7,
+  GPIO_PORT_H,
 #if defined(STM32F405xx) || defined(STM32F415xx) || defined(STM32F407xx) || defined(STM32F417xx) || \
     defined(STM32F427xx) || defined(STM32F429xx) || defined(STM32F437xx) ||                         \
     defined(STM32F439xx) || defined(STM32F469xx) || defined(STM32F479xx)
-  GPIO_PORT_I   = 8,
+  GPIO_PORT_I,
+#endif
+#if defined(STM32F427xx) || defined(STM32F429xx) || defined(STM32F437xx) ||                         \
+    defined(STM32F439xx) || defined(STM32F469xx) || defined(STM32F479xx)
+  GPIO_PORT_J,
+  GPIO_PORT_K,
 #endif
   GPIO_PORT_Reserved = 0x7FFFFFFF,
 } GPIO_PORT_t;

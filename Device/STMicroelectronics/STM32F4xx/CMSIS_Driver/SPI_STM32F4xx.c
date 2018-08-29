@@ -196,12 +196,7 @@ static SPI_RESOURCES SPI1_Resources = {
       NULL,
 #endif
   },
-  {
-    &RCC->APB2ENR,
-    &RCC->APB2RSTR,
-    RCC_APB2ENR_SPI1EN,
-    RCC_FREQ_APB2,
-  },
+  RCC_PERIPH_SPI1,
 #ifdef SPI1_TX_DMA_Stream
   &SPI1_TX_DMA,
 #else
@@ -296,12 +291,7 @@ static SPI_RESOURCES SPI2_Resources = {
       NULL,
 #endif
   },
-  {
-    &RCC->APB1ENR,
-    &RCC->APB1RSTR,
-    RCC_APB1ENR_SPI2EN,
-    RCC_FREQ_APB1,
-  },
+  RCC_PERIPH_SPI2,
 #ifdef SPI2_TX_DMA_Stream
   &SPI2_TX_DMA,
 #else
@@ -396,12 +386,7 @@ static SPI_RESOURCES SPI3_Resources = {
       NULL,
 #endif
   },
-  {
-    &RCC->APB1ENR,
-    &RCC->APB1RSTR,
-    RCC_APB1ENR_SPI3EN,
-    RCC_FREQ_APB1,
-  },
+  RCC_PERIPH_SPI3,
 #ifdef SPI3_TX_DMA_Stream
   &SPI3_TX_DMA,
 #else
@@ -496,12 +481,7 @@ static SPI_RESOURCES SPI4_Resources = {
       NULL,
 #endif
   },
-  {
-    &RCC->APB2ENR,
-    &RCC->APB2RSTR,
-    RCC_APB2ENR_SPI4EN,
-    RCC_FREQ_APB2,
-  },
+  RCC_PERIPH_SPI4,
 #ifdef SPI4_TX_DMA_Stream
   &SPI4_TX_DMA,
 #else
@@ -596,12 +576,7 @@ static SPI_RESOURCES SPI5_Resources = {
       NULL,
 #endif
   },
-  {
-    &RCC->APB2ENR,
-    &RCC->APB2RSTR,
-    RCC_APB2ENR_SPI5EN,
-    RCC_FREQ_APB2,
-  },
+  RCC_PERIPH_SPI5,
 #ifdef SPI5_TX_DMA_Stream
   &SPI5_TX_DMA,
 #else
@@ -696,12 +671,7 @@ static SPI_RESOURCES SPI6_Resources = {
       NULL,
 #endif
   },
-  {
-    &RCC->APB2ENR,
-    &RCC->APB2RSTR,
-    RCC_APB2ENR_SPI6EN,
-    RCC_FREQ_APB2,
-  },
+  RCC_PERIPH_SPI6,
 #ifdef SPI6_TX_DMA_Stream
   &SPI6_TX_DMA,
 #else
@@ -752,7 +722,7 @@ int32_t CalcPrescalerValue(SPI_RESOURCES *spi, uint32_t freq)
 {
   int32_t val;
 
-  uint32_t pclk = RCC_GetFreq(spi->rcc.freq_domain);
+  uint32_t pclk = RCC_GetPeriphFreq(spi->rcc);
   for (val = 0; val < 8; val++) {
     if (freq >= (pclk >> (val + 1)))
       break;
@@ -764,92 +734,6 @@ int32_t CalcPrescalerValue(SPI_RESOURCES *spi, uint32_t freq)
   }
 
   return (val);
-}
-
-/**
- * @fn          bool isData16bit(const SPI_INFO *info)
- * @brief
- * @param[in]   info
- * @return
- */
-static
-bool isData16bit(const SPI_INFO *info)
-{
-  return ((info->mode & ARM_SPI_DATA_BITS_Msk) == ARM_SPI_DATA_BITS(16U));
-}
-
-/**
- * @fn          uint32_t SPI_TxData(SPI_TypeDef *reg, SPI_INFO *info, SPI_TRANSFER_INFO *xfer)
- * @brief       SPI Tx Data function
- * @param[out]  reg
- * @param[in]   info
- * @param[out]  xfer
- * @return
- */
-static
-uint32_t SPI_TxData(SPI_TypeDef *reg, const SPI_INFO *info, SPI_TRANSFER_INFO *xfer)
-{
-  uint32_t event = ARM_SPI_EVENT_DATA_LOST;
-  uint16_t value;
-
-  if (xfer->tx_cnt < xfer->num) {
-    if (xfer->tx_buf != NULL) {
-      value = (uint16_t)(*xfer->tx_buf++);
-      if (isData16bit(info)) {
-        value |= (uint16_t)(*xfer->tx_buf++ << 8U);
-      }
-    }
-    else {
-      value = xfer->def_val;
-    }
-
-    /* Write data to data register */
-    reg->DR = value;
-
-    xfer->tx_cnt++;
-    event = 0U;
-  }
-
-  return event;
-}
-
-/**
- * @fn          uint32_t SPI_RxData(SPI_TypeDef *reg, const SPI_INFO *info, SPI_TRANSFER_INFO *xfer)
- * @brief       SPI Rx Data function
- * @param[out]  reg
- * @param[in]   info
- * @param[out]  xfer
- * @return
- */
-static
-uint32_t SPI_RxData(SPI_TypeDef *reg, const SPI_INFO *info, SPI_TRANSFER_INFO *xfer)
-{
-  uint32_t event = ARM_SPI_EVENT_DATA_LOST;
-  uint16_t value;
-
-  if (xfer->rx_cnt < xfer->num) {
-    value = reg->DR;
-
-    if (xfer->rx_buf != NULL) {
-      *xfer->rx_buf++ = (uint8_t)value;
-
-      if (isData16bit(info)) {
-        *xfer->rx_buf++ = (uint8_t)(value >> 8U);
-      }
-    }
-
-    xfer->rx_cnt++;
-
-    if (xfer->rx_cnt == xfer->num) {
-      /* Transfer completed */
-      event = ARM_SPI_EVENT_TRANSFER_COMPLETE;
-    }
-    else {
-      event = 0U;
-    }
-  }
-
-  return event;
 }
 
 /**
@@ -957,7 +841,7 @@ int32_t SPI_PowerControl(ARM_POWER_STATE state, SPI_RESOURCES *spi)
   switch (state) {
     case ARM_POWER_OFF:
       /* SPI peripheral reset */
-      RCC_ResetPeriph(&spi->rcc);
+      RCC_ResetPeriph(spi->rcc);
       /* Disable SPI IRQ */
       NVIC_DisableIRQ(spi->irq_num);
 
@@ -971,7 +855,7 @@ int32_t SPI_PowerControl(ARM_POWER_STATE state, SPI_RESOURCES *spi)
 #endif
 
       /* Disable peripheral clock */
-      RCC_DisablePeriph(&spi->rcc);
+      RCC_DisablePeriph(spi->rcc);
 
       /* Clear status flags */
       info->status.busy       = 0U;
@@ -1000,7 +884,7 @@ int32_t SPI_PowerControl(ARM_POWER_STATE state, SPI_RESOURCES *spi)
       info->state |= SPI_POWERED;
 
       /* Enable the peripheral clock */
-      RCC_EnablePeriph(&spi->rcc);
+      RCC_EnablePeriph(spi->rcc);
 
       /* Clear and Enable SPI IRQ */
       NVIC_ClearPendingIRQ(spi->irq_num);
@@ -1035,7 +919,7 @@ int32_t SPI_PowerControl(ARM_POWER_STATE state, SPI_RESOURCES *spi)
 #endif
 
       /* Reset the peripheral */
-      RCC_ResetPeriph(&spi->rcc);
+      RCC_ResetPeriph(spi->rcc);
       break;
 
     default:
@@ -1059,6 +943,8 @@ int32_t SPI_Send(const void *data, uint32_t num, SPI_RESOURCES *spi)
   SPI_INFO *info = spi->info;
   SPI_TRANSFER_INFO *xfer = spi->xfer;
   SPI_TypeDef *reg = spi->reg;
+  uint32_t cr1, cr2;
+  uint32_t value;
 
   if ((data == NULL) || (num == 0U))
     return ARM_DRIVER_ERROR_PARAMETER;
@@ -1069,10 +955,8 @@ int32_t SPI_Send(const void *data, uint32_t num, SPI_RESOURCES *spi)
   if (info->status.busy)
     return ARM_DRIVER_ERROR_BUSY;
 
-  /* Check if transmit pin available */
-  if ((((spi->io.mosi != NULL) && ((info->mode & ARM_SPI_CONTROL_Msk) == ARM_SPI_MODE_MASTER)) ||
-       ((spi->io.miso != NULL) && ((info->mode & ARM_SPI_CONTROL_Msk) == ARM_SPI_MODE_SLAVE ))) == 0U)
-    return ARM_DRIVER_ERROR;
+  cr1 = reg->CR1;
+  cr2 = reg->CR2;
 
   /* Update SPI statuses */
   info->status.busy       = 1U;
@@ -1095,7 +979,7 @@ int32_t SPI_Send(const void *data, uint32_t num, SPI_RESOURCES *spi)
     cfg->MemInc = DMA_MINC_DISABLE;
     cfg->PerInc = DMA_PINC_DISABLE;
 
-    if (isData16bit(info)) {
+    if (reg->CR1 & SPI_CR1_DFF) {
       /* 16 - bit data frame */
       cfg->MemDataAlign = DMA_MDATAALIGN_HALFWORD;
       cfg->PerDataAlign = DMA_PDATAALIGN_HALFWORD;
@@ -1110,9 +994,14 @@ int32_t SPI_Send(const void *data, uint32_t num, SPI_RESOURCES *spi)
     DMA_StreamConfig(spi->rx_dma);
     DMA_StreamEnable(spi->rx_dma, (uint32_t)&reg->DR, (uint32_t)&xfer->dump_val, num);
     /* RX Buffer DMA enable */
-    reg->CR2 |= SPI_CR2_RXDMAEN;
+    cr2 |= SPI_CR2_RXDMAEN;
   }
 #endif
+  {
+    // Interrupt mode
+    // RX Buffer not empty interrupt enable
+    cr2 |= SPI_CR2_RXNEIE;
+  }
 
 #ifdef SPI_DMA_TX
   /* DMA mode */
@@ -1123,7 +1012,7 @@ int32_t SPI_Send(const void *data, uint32_t num, SPI_RESOURCES *spi)
     cfg->MemInc = DMA_MINC_ENABLE;
     cfg->PerInc = DMA_PINC_DISABLE;
 
-    if (isData16bit(info)) {
+    if (reg->CR1 & SPI_CR1_DFF) {
       /* 16 - bit data frame */
       cfg->MemDataAlign = DMA_MDATAALIGN_HALFWORD;
       cfg->PerDataAlign = DMA_PDATAALIGN_HALFWORD;
@@ -1138,14 +1027,28 @@ int32_t SPI_Send(const void *data, uint32_t num, SPI_RESOURCES *spi)
     DMA_StreamConfig(spi->tx_dma);
     DMA_StreamEnable(spi->tx_dma, (uint32_t)&reg->DR, (uint32_t)data, num);
     /* TX Buffer DMA enable */
-    reg->CR2 |= SPI_CR2_TXDMAEN;
+    cr2 |= SPI_CR2_TXDMAEN;
   }
   else
 #endif
   {
-    // Interrupt mode
-    SPI_TxData(reg, info, xfer);
+    /* Interrupt mode */
+    value = (uint32_t)(*xfer->tx_buf++);
+
+    if (cr1 & SPI_CR1_DFF) {
+      value |= (uint32_t)(*xfer->tx_buf++ << 8U);
+    }
+
+    /* Write data to data register */
+    reg->DR = value;
+
+    if (++xfer->tx_cnt < xfer->num) {
+      /* TX Buffer empty interrupt enable */
+      cr2 |= SPI_CR2_TXEIE;
+    }
   }
+
+  reg->CR2 = cr2;
 
   return ARM_DRIVER_OK;
 }
@@ -1164,6 +1067,7 @@ int32_t SPI_Receive(void *data, uint32_t num, SPI_RESOURCES *spi)
   SPI_INFO *info = spi->info;
   SPI_TRANSFER_INFO *xfer = spi->xfer;
   SPI_TypeDef *reg = spi->reg;
+  uint32_t cr2;
 
   if ((data == NULL) || (num == 0U))
     return ARM_DRIVER_ERROR_PARAMETER;
@@ -1174,12 +1078,7 @@ int32_t SPI_Receive(void *data, uint32_t num, SPI_RESOURCES *spi)
   if (info->status.busy)
     return ARM_DRIVER_ERROR_BUSY;
 
-  // Check if receive pin available
-  if ((((spi->io.miso != NULL) && ((info->mode & ARM_SPI_CONTROL_Msk) == ARM_SPI_MODE_MASTER)) ||
-       ((spi->io.mosi != NULL) && ((info->mode & ARM_SPI_CONTROL_Msk) == ARM_SPI_MODE_SLAVE))) == 0U)
-  {
-    return ARM_DRIVER_ERROR;
-  }
+  cr2 = reg->CR2;
 
   // Update SPI statuses
   info->status.busy       = 1U;
@@ -1202,7 +1101,7 @@ int32_t SPI_Receive(void *data, uint32_t num, SPI_RESOURCES *spi)
     cfg->MemInc = DMA_MINC_ENABLE;
     cfg->PerInc = DMA_PINC_DISABLE;
 
-    if (isData16bit(info)) {
+    if (reg->CR1 & SPI_CR1_DFF) {
       /* 16 - bit data frame */
       cfg->MemDataAlign = DMA_MDATAALIGN_HALFWORD;
       cfg->PerDataAlign = DMA_PDATAALIGN_HALFWORD;
@@ -1217,9 +1116,14 @@ int32_t SPI_Receive(void *data, uint32_t num, SPI_RESOURCES *spi)
     DMA_StreamConfig(spi->rx_dma);
     DMA_StreamEnable(spi->rx_dma, (uint32_t)&reg->DR, (uint32_t)data, num);
     /* RX Buffer DMA enable */
-    reg->CR2 |= SPI_CR2_RXDMAEN;
+    cr2 |= SPI_CR2_RXDMAEN;
   }
 #endif
+  {
+    // Interrupt mode
+    // RX Buffer not empty interrupt enable
+    cr2 |= SPI_CR2_RXNEIE;
+  }
 
 #ifdef SPI_DMA_TX
   /* DMA mode */
@@ -1230,7 +1134,7 @@ int32_t SPI_Receive(void *data, uint32_t num, SPI_RESOURCES *spi)
     cfg->MemInc = DMA_MINC_DISABLE;
     cfg->PerInc = DMA_PINC_DISABLE;
 
-    if (isData16bit(info)) {
+    if (reg->CR1 & SPI_CR1_DFF) {
       /* 16 - bit data frame */
       cfg->MemDataAlign = DMA_MDATAALIGN_HALFWORD;
       cfg->PerDataAlign = DMA_PDATAALIGN_HALFWORD;
@@ -1245,14 +1149,22 @@ int32_t SPI_Receive(void *data, uint32_t num, SPI_RESOURCES *spi)
     DMA_StreamConfig(spi->tx_dma);
     DMA_StreamEnable(spi->tx_dma, (uint32_t)&reg->DR, (uint32_t)&xfer->def_val, num);
     /* TX Buffer DMA enable */
-    reg->CR2 |= SPI_CR2_TXDMAEN;
+    cr2 |= SPI_CR2_TXDMAEN;
   }
   else
 #endif
   {
-    // Interrupt mode
-    SPI_TxData(reg, info, xfer);
+    /* Interrupt mode */
+    /* Write data to data register */
+    reg->DR = (uint32_t)xfer->def_val;
+
+    if (++xfer->tx_cnt < xfer->num) {
+      /* TX Buffer empty interrupt enable */
+      cr2 |= SPI_CR2_TXEIE;
+    }
   }
+
+  reg->CR2 = cr2;
 
   return ARM_DRIVER_OK;
 }
@@ -1272,6 +1184,8 @@ int32_t SPI_Transfer(const void *data_out, void *data_in, uint32_t num, SPI_RESO
   SPI_INFO *info = spi->info;
   SPI_TRANSFER_INFO *xfer = spi->xfer;
   SPI_TypeDef *reg = spi->reg;
+  uint32_t cr1, cr2;
+  uint32_t value;
 
   if ((data_out == NULL) || (data_in == NULL) || (num == 0U))
     return ARM_DRIVER_ERROR_PARAMETER;
@@ -1282,9 +1196,8 @@ int32_t SPI_Transfer(const void *data_out, void *data_in, uint32_t num, SPI_RESO
   if (info->status.busy)
     return ARM_DRIVER_ERROR_BUSY;
 
-  // Check if receive and transmit pins available
-  if ((spi->io.miso == NULL) || (spi->io.mosi == NULL))
-    return ARM_DRIVER_ERROR;
+  cr1 = reg->CR1;
+  cr2 = reg->CR2;
 
   // Update SPI statuses
   info->status.busy       = 1U;
@@ -1308,7 +1221,7 @@ int32_t SPI_Transfer(const void *data_out, void *data_in, uint32_t num, SPI_RESO
       cfg->MemInc = DMA_MINC_ENABLE;
       cfg->PerInc = DMA_PINC_DISABLE;
 
-      if (isData16bit(info)) {
+      if (reg->CR1 & SPI_CR1_DFF) {
         /* 16 - bit data frame */
         cfg->MemDataAlign = DMA_MDATAALIGN_HALFWORD;
         cfg->PerDataAlign = DMA_PDATAALIGN_HALFWORD;
@@ -1323,7 +1236,7 @@ int32_t SPI_Transfer(const void *data_out, void *data_in, uint32_t num, SPI_RESO
       DMA_StreamConfig(spi->rx_dma);
       DMA_StreamEnable(spi->rx_dma, (uint32_t)&reg->DR, (uint32_t)data_in, num);
       /* RX Buffer DMA enable */
-      reg->CR2 |= SPI_CR2_RXDMAEN;
+      cr2 |= SPI_CR2_RXDMAEN;
     }
 
     if (spi->tx_dma != NULL) {
@@ -1333,7 +1246,7 @@ int32_t SPI_Transfer(const void *data_out, void *data_in, uint32_t num, SPI_RESO
       cfg->MemInc = DMA_MINC_ENABLE;
       cfg->PerInc = DMA_PINC_DISABLE;
 
-      if (isData16bit(info)) {
+      if (reg->CR1 & SPI_CR1_DFF) {
         /* 16 - bit data frame */
         cfg->MemDataAlign = DMA_MDATAALIGN_HALFWORD;
         cfg->PerDataAlign = DMA_PDATAALIGN_HALFWORD;
@@ -1348,15 +1261,32 @@ int32_t SPI_Transfer(const void *data_out, void *data_in, uint32_t num, SPI_RESO
       DMA_StreamConfig(spi->tx_dma);
       DMA_StreamEnable(spi->tx_dma, (uint32_t)&reg->DR, (uint32_t)data_out, num);
       /* TX Buffer DMA enable */
-      reg->CR2 |= SPI_CR2_TXDMAEN;
+      cr2 |= SPI_CR2_TXDMAEN;
     }
   }
   else
 #endif
   {
-    // Interrupt mode
-    SPI_TxData(reg, info, xfer);
+    /* Interrupt mode */
+    /* RX Buffer not empty interrupt enable */
+    cr2 |= SPI_CR2_RXNEIE;
+
+    value = (uint32_t)(*xfer->tx_buf++);
+
+    if (cr1 & SPI_CR1_DFF) {
+      value |= (uint32_t)(*xfer->tx_buf++ << 8U);
+    }
+
+    /* Write data to data register */
+    reg->DR = value;
+
+    if (++xfer->tx_cnt < xfer->num) {
+      /* TX Buffer empty interrupt enable */
+      cr2 |= SPI_CR2_TXEIE;
+    }
   }
+
+  reg->CR2 = cr2;
 
   return ARM_DRIVER_OK;
 }
@@ -1400,20 +1330,27 @@ int32_t SPI_Control(uint32_t control, uint32_t arg, SPI_RESOURCES *spi)
 
   if ((control & ARM_SPI_CONTROL_Msk) == ARM_SPI_ABORT_TRANSFER) {
     // Send abort
+    cr2 = reg->CR2;
+
     if (spi->tx_dma != NULL) {
       // DMA mode
       // TX buffer DMA disable
-      reg->CR2 &= ~SPI_CR2_TXDMAEN;
+      cr2 &= ~SPI_CR2_TXDMAEN;
 
       // Abort TX DMA transfer
       DMA_StreamDisable(spi->tx_dma);
+    }
+    else {
+      // Interrupt mode
+      // Disable TX buffer empty interrupt
+      cr2 &= ~SPI_CR2_TXEIE;
     }
 
     // Receive abort
     if (spi->rx_dma != NULL) {
       // DMA mode
       // RX buffer DMA disable
-      reg->CR2 &= ~SPI_CR2_RXDMAEN;
+      cr2 &= ~SPI_CR2_RXDMAEN;
 
       // Abort RX DMA transfer
       DMA_StreamDisable(spi->rx_dma);
@@ -1421,16 +1358,13 @@ int32_t SPI_Control(uint32_t control, uint32_t arg, SPI_RESOURCES *spi)
     else {
       // Interrupt mode
       // Disable RX buffer not empty interrupt
-      reg->CR2 &= ~SPI_CR2_RXNEIE;
+      cr2 &= ~SPI_CR2_RXNEIE;
     }
+
+    reg->CR2 = cr2;
 
     memset((void *)spi->xfer, 0, sizeof(SPI_TRANSFER_INFO));
     info->status.busy = 0U;
-
-    if (spi->rx_dma == NULL) {
-      //Re-enable RX buffer Not Empty interrupt
-      reg->CR2 |= SPI_CR2_RXNEIE;
-    }
 
     return ARM_DRIVER_OK;
   }
@@ -1473,7 +1407,7 @@ int32_t SPI_Control(uint32_t control, uint32_t arg, SPI_RESOURCES *spi)
 
     case ARM_SPI_GET_BUS_SPEED:
       // Return current bus speed
-      return (int32_t)(RCC_GetFreq(spi->rcc.freq_domain) >> (((reg->CR1 & SPI_CR1_BR) >> 3U) + 1U));
+      return (int32_t)(RCC_GetPeriphFreq(spi->rcc) >> (((reg->CR1 & SPI_CR1_BR) >> 3U) + 1U));
 
     case ARM_SPI_SET_DEFAULT_TX_VALUE:
       spi->xfer->def_val = (uint16_t)(arg & 0xFFFFU);
@@ -1548,10 +1482,8 @@ int32_t SPI_Control(uint32_t control, uint32_t arg, SPI_RESOURCES *spi)
   // Data Bits
   switch (control & ARM_SPI_DATA_BITS_Msk) {
     case ARM_SPI_DATA_BITS(8U):
-      mode |= ARM_SPI_DATA_BITS(8U);
       break;
     case ARM_SPI_DATA_BITS(16U):
-      mode |= ARM_SPI_DATA_BITS(16U);
       cr1 |= SPI_CR1_DFF;
       break;
     default:
@@ -1668,12 +1600,6 @@ int32_t SPI_Control(uint32_t control, uint32_t arg, SPI_RESOURCES *spi)
 
   // Configure registers
   reg->CR1 &= ~SPI_CR1_SPE;
-
-  if ((spi->rx_dma == NULL) && (spi->tx_dma == NULL)) {
-    // Enable RX buffer Not Empty interrupt
-    cr2 |= SPI_CR2_RXNEIE;
-  }
-
   reg->CR2 = cr2 | SPI_CR2_ERRIE;
   reg->CR1 = cr1;
 
@@ -1715,8 +1641,9 @@ ARM_SPI_STATUS SPI_GetStatus(SPI_RESOURCES *spi)
  */
 void SPI_IRQHandler(SPI_RESOURCES *spi)
 {
-  uint16_t value;
-  uint32_t event, sr;
+  uint32_t value;
+  uint32_t event;
+  register uint32_t sr, cr1, cr2;
 
   SPI_INFO *info = spi->info;
   SPI_TRANSFER_INFO *xfer = spi->xfer;
@@ -1724,27 +1651,27 @@ void SPI_IRQHandler(SPI_RESOURCES *spi)
 
   event = 0U;
 
-  // Save status register
+  /* Save control register 2 */
+  cr1 = reg->CR1;
+  /* Save control register 2 */
+  cr2 = reg->CR2;
+  /* Save status register */
   sr = reg->SR;
 
-  if ((sr & (SPI_SR_OVR | SPI_SR_UDR | SPI_SR_MODF)) != 0U) {
+  if ((sr & (SPI_SR_OVR | SPI_SR_MODF)) != 0U) {
     if ((sr & SPI_SR_OVR) != 0U) {
       value = reg->DR;
+
       if ((xfer->rx_cnt < xfer->num) && (xfer->rx_buf != NULL)) {
         *xfer->rx_buf++ = (uint8_t)value;
 
-        if (isData16bit(info))
+        if (cr1 & SPI_CR1_DFF) {
           *xfer->rx_buf++ = (uint8_t)(value >> 8U);
+        }
       }
       xfer->rx_cnt++;
       sr = reg->SR;
 
-      info->status.data_lost = 1U;
-      event |= ARM_SPI_EVENT_DATA_LOST;
-    }
-
-    if ((sr & SPI_SR_UDR) != 0U) {
-      // Underrun flag is set
       info->status.data_lost = 1U;
       event |= ARM_SPI_EVENT_DATA_LOST;
     }
@@ -1754,27 +1681,71 @@ void SPI_IRQHandler(SPI_RESOURCES *spi)
       info->status.mode_fault = 1U;
 
       // Write CR1 register to clear MODF flag
-      reg->CR1 = (uint32_t)reg->CR1;
+      reg->CR1 = cr1;
       event |= ARM_SPI_EVENT_MODE_FAULT;
     }
   }
-  else {
-    if (((sr & SPI_SR_RXNE) != 0U) && ((reg->CR2 & SPI_CR2_RXNEIE) != 0U)) {
-      // RX buffer Not Empty
-      event = SPI_RxData(reg, info, xfer);
 
-      if (event == 0U) {
-        event = SPI_TxData(reg, info, xfer);
-      }
-      else {
-        if (event == ARM_SPI_EVENT_TRANSFER_COMPLETE) {
-          info->status.busy = 0U;
+  if (((sr & SPI_SR_RXNE) != 0U) && ((cr2 & SPI_CR2_RXNEIE) != 0U)) {
+    // Receive Buffer Not Empty
+    if (xfer->rx_cnt < xfer->num) {
+      value = reg->DR;
+
+      if (xfer->rx_buf != NULL) {
+        *xfer->rx_buf++ = (uint8_t)value;
+
+        if (cr1 & SPI_CR1_DFF) {
+          *xfer->rx_buf++ = (uint8_t)(value >> 8U);
         }
       }
+
+      xfer->rx_cnt++;
+
+      if (xfer->rx_cnt == xfer->num) {
+        /* Disable RX Buffer Not Empty Interrupt */
+        cr2 &= ~SPI_CR2_RXNEIE;
+        /* Clear busy flag */
+        info->status.busy = 0U;
+        /* Transfer completed */
+        event |= ARM_SPI_EVENT_TRANSFER_COMPLETE;
+      }
+    }
+    else {
+      // Unexpected transfer, data lost
+      event |= ARM_SPI_EVENT_DATA_LOST;
     }
   }
 
-  // Send event
+  if (((sr & SPI_SR_TXE) != 0U) && ((cr2 & SPI_CR2_TXEIE) != 0U)) {
+    if (xfer->tx_cnt < xfer->num) {
+      if (xfer->tx_buf != NULL) {
+        value = (uint32_t)(*xfer->tx_buf++);
+
+        if (cr1 & SPI_CR1_DFF) {
+          value |= (uint32_t)(*xfer->tx_buf++ << 8U);
+        }
+      }
+      else {
+        value = (uint32_t)xfer->def_val;
+      }
+
+      /* Write data to data register */
+      reg->DR = value;
+
+      if (++xfer->tx_cnt == xfer->num) {
+        /* All data sent, disable TX Buffer Empty Interrupt */
+        cr2 &= ~SPI_CR2_TXEIE;
+      }
+    }
+    else {
+      /* Unexpected transfer, data lost */
+      event |= ARM_SPI_EVENT_DATA_LOST;
+    }
+  }
+
+  reg->CR2 = cr2;
+
+  /* Send event */
   if ((event != 0U) && ((info->cb_event != NULL))) {
     info->cb_event(event);
   }
@@ -1785,6 +1756,8 @@ static
 void SPI_TX_DMA_Complete(uint32_t event, SPI_RESOURCES *spi)
 {
   if (event & DMA_EVENT_TRANSFER_COMPLETE) {
+    /* TX buffer DMA disable */
+    spi->reg->CR2 &= ~SPI_CR2_TXDMAEN;
     spi->xfer->tx_cnt = spi->xfer->num;
   }
 }
@@ -1794,12 +1767,17 @@ void SPI_TX_DMA_Complete(uint32_t event, SPI_RESOURCES *spi)
 static
 void SPI_RX_DMA_Complete(uint32_t event, SPI_RESOURCES *spi)
 {
-  if (event & DMA_EVENT_TRANSFER_COMPLETE) {
-    spi->xfer->rx_cnt = spi->xfer->num;
-    spi->info->status.busy = 0U;
+  SPI_INFO *info = spi->info;
 
-    if (spi->info->cb_event != NULL)
-      spi->info->cb_event(ARM_SPI_EVENT_TRANSFER_COMPLETE);
+  if (event & DMA_EVENT_TRANSFER_COMPLETE) {
+    /* RX Buffer DMA disable */
+    spi->reg->CR2 |= SPI_CR2_RXDMAEN;
+
+    spi->xfer->rx_cnt = spi->xfer->num;
+    info->status.busy = 0U;
+
+    if (info->cb_event != NULL)
+      info->cb_event(ARM_SPI_EVENT_TRANSFER_COMPLETE);
   }
 }
 #endif  // SPI_DMA_RX

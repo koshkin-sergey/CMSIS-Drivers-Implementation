@@ -172,12 +172,7 @@ static I2S_RESOURCES I2S2_Resources = {
   NULL,
 #endif
   SPI2_IRQn,
-  {
-    &RCC->APB1ENR,
-    &RCC->APB1RSTR,
-    RCC_APB1ENR_SPI2EN,
-    RCC_FREQ_APB1,
-  },
+  RCC_PERIPH_SPI2,
   &I2S2_Info,
 };
 #endif /* USE_I2S2 */
@@ -248,12 +243,7 @@ static I2S_RESOURCES I2S3_Resources = {
   NULL,
 #endif
   SPI3_IRQn,
-  {
-    &RCC->APB1ENR,
-    &RCC->APB1RSTR,
-    RCC_APB1ENR_SPI3EN,
-    RCC_FREQ_APB1,
-  },
+  RCC_PERIPH_SPI3,
   &I2S3_Info,
 };
 #endif /* USE_I2S3 */
@@ -373,7 +363,7 @@ int32_t I2S_PowerControl(ARM_POWER_STATE state, I2S_RESOURCES *i2s)
   switch (state) {
     case ARM_POWER_OFF:
       /* Enable I2S clock */
-      RCC_EnablePeriph(&i2s->rcc);
+      RCC_EnablePeriph(i2s->rcc);
 
       /* Disable I2S peripheral */
       reg->I2SCFGR = 0U;
@@ -393,7 +383,7 @@ int32_t I2S_PowerControl(ARM_POWER_STATE state, I2S_RESOURCES *i2s)
 #endif
 
       /* Disable peripheral clock */
-      RCC_DisablePeriph(&i2s->rcc);
+      RCC_DisablePeriph(i2s->rcc);
 
       info->status.tx_busy      = 0U;
       info->status.rx_busy      = 0U;
@@ -412,7 +402,7 @@ int32_t I2S_PowerControl(ARM_POWER_STATE state, I2S_RESOURCES *i2s)
         return ARM_DRIVER_OK;
 
       /* Enable the peripheral clock */
-      RCC_EnablePeriph(&i2s->rcc);
+      RCC_EnablePeriph(i2s->rcc);
 
       /* Clear and Enable I2S IRQ */
       NVIC_ClearPendingIRQ(i2s->irq_num);
@@ -458,7 +448,7 @@ int32_t I2S_PowerControl(ARM_POWER_STATE state, I2S_RESOURCES *i2s)
 #endif
 
       /* Reset the peripheral */
-      RCC_ResetPeriph(&i2s->rcc);
+      RCC_ResetPeriph(i2s->rcc);
 
       /* Enable interrupts */
       reg->CR2 |= SPI_CR2_ERRIE;

@@ -188,12 +188,7 @@ static const USART_RESOURCES USART1_Resources = {
   },
 
   USART1_IRQn,
-  {
-    &RCC->APB2ENR,
-    &RCC->APB2RSTR,
-    RCC_APB2RSTR_USART1RST,
-    RCC_FREQ_APB2
-  },
+  RCC_PERIPH_USART1,
   &USART1_Info,
   &USART1_TransferInfo,
 };
@@ -328,12 +323,7 @@ static const USART_RESOURCES USART2_Resources = {
   },
 
   USART2_IRQn,
-  {
-    &RCC->APB1ENR,
-    &RCC->APB1RSTR,
-    RCC_APB1RSTR_USART2RST,
-    RCC_FREQ_APB1
-  },
+  RCC_PERIPH_USART2,
   &USART2_Info,
   &USART2_TransferInfo,
 };
@@ -468,12 +458,7 @@ static const USART_RESOURCES USART3_Resources = {
   },
 
   USART3_IRQn,
-  {
-    &RCC->APB1ENR,
-    &RCC->APB1RSTR,
-    RCC_APB1RSTR_USART3RST,
-    RCC_FREQ_APB1
-  },
+  RCC_PERIPH_USART3,
   &USART3_Info,
   &USART3_TransferInfo,
 };
@@ -548,12 +533,7 @@ static const USART_RESOURCES USART4_Resources = {
   },
 
   UART4_IRQn,
-  {
-    &RCC->APB1ENR,
-    &RCC->APB1RSTR,
-    RCC_APB1RSTR_UART4RST,
-    RCC_FREQ_APB1
-  },
+  RCC_PERIPH_UART4,
   &UART4_Info,
   &UART4_TransferInfo
 };
@@ -628,12 +608,7 @@ static const USART_RESOURCES USART5_Resources = {
   },
 
   UART5_IRQn,
-  {
-    &RCC->APB1ENR,
-    &RCC->APB1RSTR,
-    RCC_APB1RSTR_UART5RST,
-    RCC_FREQ_APB1
-  },
+  RCC_PERIPH_UART5,
   &UART5_Info,
   &UART5_TransferInfo
 };
@@ -768,12 +743,7 @@ static const USART_RESOURCES USART6_Resources = {
   },
 
   USART6_IRQn,
-  {
-    &RCC->APB2ENR,
-    &RCC->APB2RSTR,
-    RCC_APB2RSTR_USART6RST,
-    RCC_FREQ_APB2
-  },
+  RCC_PERIPH_USART6,
   &USART6_Info,
   &USART6_TransferInfo
 };
@@ -848,15 +818,9 @@ static const USART_RESOURCES USART7_Resources = {
   },
 
   UART7_IRQn,
-  {
-    &RCC->APB1ENR,
-    &RCC->APB1RSTR,
-    RCC_APB1RSTR_UART7RST,
-    RCC_FREQ_APB1
-  },
+  RCC_PERIPH_UART7,
   &UART7_Info,
   &UART7_TransferInfo,
-  RCC_APB1RSTR_UART7RST
 };
 #endif
 
@@ -929,15 +893,9 @@ static const USART_RESOURCES USART8_Resources = {
   },
 
   UART8_IRQn,
-  {
-    &RCC->APB1ENR,
-    &RCC->APB1RSTR,
-    RCC_APB1RSTR_UART8RST,
-    RCC_FREQ_APB1
-  },
+  RCC_PERIPH_UART8,
   &UART8_Info,
   &UART8_TransferInfo,
-  RCC_APB1RSTR_UART8RST
 };
 #endif
 
@@ -1010,12 +968,7 @@ static const USART_RESOURCES USART9_Resources = {
   },
 
   UART9_IRQn,
-  {
-    &RCC->APB2ENR,
-    &RCC->APB2RSTR,
-    RCC_APB2RSTR_UART9RST,
-    RCC_FREQ_APB2
-  },
+  RCC_PERIPH_UART9,
   &UART9_Info,
   &UART9_TransferInfo
 };
@@ -1090,12 +1043,7 @@ static const USART_RESOURCES USART10_Resources = {
   },
 
   UART10_IRQn,
-  {
-    &RCC->APB2ENR,
-    &RCC->APB2RSTR,
-    RCC_APB2RSTR_UART10RST,
-    RCC_FREQ_APB2
-  },
+  RCC_PERIPH_UART10,
   &UART10_Info,
   &UART10_TransferInfo
 };
@@ -1243,13 +1191,13 @@ int32_t USART_PowerControl(ARM_POWER_STATE state, USART_RESOURCES *usart)
   switch (state) {
     case ARM_POWER_OFF:
       // USART peripheral reset
-      RCC_ResetPeriph(&usart->rcc);
+      RCC_ResetPeriph(usart->rcc);
 
       /* Disable IRQ */
       NVIC_DisableIRQ(usart->irq_num);
 
       // Disable USART clock
-      RCC_DisablePeriph(&usart->rcc);
+      RCC_DisablePeriph(usart->rcc);
 
       // Clear Status flags
       info->status.tx_busy          = 0U;
@@ -1295,7 +1243,7 @@ int32_t USART_PowerControl(ARM_POWER_STATE state, USART_RESOURCES *usart)
       info->flags = USART_FLAG_POWERED | USART_FLAG_INITIALIZED;
 
       // Enable USART clock
-      RCC_EnablePeriph(&usart->rcc);
+      RCC_EnablePeriph(usart->rcc);
 
       // Clear and Enable USART IRQ
       NVIC_ClearPendingIRQ(usart->irq_num);
@@ -1303,7 +1251,7 @@ int32_t USART_PowerControl(ARM_POWER_STATE state, USART_RESOURCES *usart)
       NVIC_EnableIRQ(usart->irq_num);
 
       // USART peripheral reset
-      RCC_ResetPeriph(&usart->rcc);
+      RCC_ResetPeriph(usart->rcc);
 
     break;
     default: return ARM_DRIVER_ERROR_UNSUPPORTED;
@@ -1714,7 +1662,7 @@ int32_t USART_Control(uint32_t control, uint32_t arg, USART_RESOURCES *usart)
           usart->reg->CR3 |= USART_CR3_IRLP;
 
           // Get clock
-          val = RCC_GetFreq(usart->rcc.freq_domain);
+          val = RCC_GetPeriphFreq(usart->rcc);
 
           // Calculate period in ns
           val = 1000000000U / val;
@@ -1752,7 +1700,7 @@ int32_t USART_Control(uint32_t control, uint32_t arg, USART_RESOURCES *usart)
     case ARM_USART_SET_SMART_CARD_CLOCK:
       if (info->mode == ARM_USART_MODE_SMART_CARD) {
         // Get clock
-        val = RCC_GetFreq(usart->rcc.freq_domain);
+        val = RCC_GetPeriphFreq(usart->rcc);
 
         // Calculate period in ns
         val = 1000000000U / val;
@@ -1923,7 +1871,7 @@ int32_t USART_Control(uint32_t control, uint32_t arg, USART_RESOURCES *usart)
   }
 
   // USART Baudrate
-  uint32_t freq = RCC_GetFreq(usart->rcc.freq_domain);
+  uint32_t freq = RCC_GetPeriphFreq(usart->rcc);
   val = (uint32_t)(USART_BAUDRATE_DIVIDER(freq, arg));
   br = ((freq << 4U) / (val & 0xFFFFU)) >> 4U;
   // If inside +/- 2% tolerance, baud rate configured correctly

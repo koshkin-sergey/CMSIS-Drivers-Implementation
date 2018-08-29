@@ -42,6 +42,7 @@
 #define RTE_USART_DMA_INT_PRIORITY      (1U)
 #define RTE_SPI_INT_PRIORITY            (1U)
 #define RTE_SPI_DMA_INT_PRIORITY        (1U)
+#define RTE_EXTI_INT_PRIORITY           (1U)
 
 // <e> USART1 (Universal synchronous asynchronous receiver transmitter) [Driver_USART1]
 // <i> Configuration settings for Driver_USART1 in component ::CMSIS Driver:USART
@@ -1499,10 +1500,10 @@
 //   <e> DMA Tx
 //     <o1> Number <2=>2
 //     <i>  Selects DMA Number (only DMA2 can be used)
-//     <o2> Stream <2=>2 <3=>3 <5=>5
-//     <i>  Selects DMA Stream (only Stream 2 or 3 or 5 can be used)
-//     <o3> Channel <2=>2 <3=>3
-//     <i>  Selects DMA Channel (only Channel 2 or 3 can be used)
+//     <o2> Stream <3=>3 <5=>5
+//     <i>  Selects DMA Stream (only Stream 3 or 5 can be used)
+//     <o3> Channel <3=>3
+//     <i>  Selects DMA Channel (only Channel 3 can be used)
 //     <o4> Priority <0=>Low <1=>Medium <2=>High <3=>Very High
 //     <i>  Selects DMA Priority
 //   </e>

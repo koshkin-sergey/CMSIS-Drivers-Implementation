@@ -22,8 +22,9 @@
  ******************************************************************************/
 
 #include <stddef.h>
-#include "stm32f4xx.h"
+
 #include "GPIO_STM32F4xx.h"
+#include "RCC_STM32F4xx.h"
 
 /*******************************************************************************
  *  external declarations
@@ -45,34 +46,10 @@
  *  global variable definitions (scope: module-local)
  ******************************************************************************/
 
-/*******************************************************************************
- *  function prototypes (scope: module-local)
- ******************************************************************************/
-
-/*******************************************************************************
- *  function implementations (scope: module-local)
- ******************************************************************************/
-
-/**
- * @brief       Get a pointer to the GPIO peripherals
- * @param[in]   port    GPIO port (A..F)
- * @return      Returns a pointer to the GPIO peripherals
- */
-static
-GPIO_TypeDef* get_gpio(GPIO_PORT_t port)
-{
-  GPIO_TypeDef *gpio = NULL;
-
-  switch (port) {
-    case GPIO_PORT_A:
-      gpio = GPIOA;
-      break;
-    case GPIO_PORT_B:
-      gpio = GPIOB;
-      break;
-    case GPIO_PORT_C:
-      gpio = GPIOC;
-      break;
+static GPIO_TypeDef* ports[] = {
+    GPIOA,
+    GPIOB,
+    GPIOC,
 #if defined(STM32F401xC) || defined(STM32F401xE) ||                                                 \
     defined(STM32F405xx) || defined(STM32F415xx) || defined(STM32F407xx) || defined(STM32F417xx) || \
     defined(STM32F411xE) ||                                                                         \
@@ -80,45 +57,72 @@ GPIO_TypeDef* get_gpio(GPIO_PORT_t port)
     defined(STM32F413xx) ||                                                                         \
     defined(STM32F423xx) || defined(STM32F427xx) || defined(STM32F429xx) || defined(STM32F437xx) || \
     defined(STM32F439xx) || defined(STM32F446xx) || defined(STM32F469xx) || defined(STM32F479xx)
-    case GPIO_PORT_D:
-      gpio = GPIOD;
-      break;
-    case GPIO_PORT_E:
-      gpio = GPIOE;
-      break;
+    GPIOD,
+    GPIOE,
 #endif
 #if defined(STM32F405xx) || defined(STM32F415xx) || defined(STM32F407xx) || defined(STM32F417xx) || \
     defined(STM32F412Cx) || defined(STM32F412Rx) || defined(STM32F412Vx) || defined(STM32F412Zx) || \
     defined(STM32F413xx) ||                                                                         \
     defined(STM32F423xx) || defined(STM32F427xx) || defined(STM32F429xx) || defined(STM32F437xx) || \
     defined(STM32F439xx) || defined(STM32F446xx) || defined(STM32F469xx) || defined(STM32F479xx)
-    case GPIO_PORT_F:
-      gpio = GPIOF;
-      break;
+    GPIOF,
+    GPIOG,
 #endif
-#if defined(STM32F405xx) || defined(STM32F415xx) || defined(STM32F407xx) || defined(STM32F417xx) || \
-    defined(STM32F412Cx) || defined(STM32F412Rx) || defined(STM32F412Vx) || defined(STM32F412Zx) || \
-    defined(STM32F413xx) ||                                                                         \
-    defined(STM32F423xx) || defined(STM32F427xx) || defined(STM32F429xx) || defined(STM32F437xx) || \
-    defined(STM32F439xx) || defined(STM32F446xx) || defined(STM32F469xx) || defined(STM32F479xx)
-    case GPIO_PORT_G:
-      gpio = GPIOG;
-      break;
-#endif
-    case GPIO_PORT_H:
-      gpio = GPIOH;
-      break;
+    GPIOH,
 #if defined(STM32F405xx) || defined(STM32F415xx) || defined(STM32F407xx) || defined(STM32F417xx) || \
     defined(STM32F427xx) || defined(STM32F429xx) || defined(STM32F437xx) ||                         \
     defined(STM32F439xx) || defined(STM32F469xx) || defined(STM32F479xx)
-    case GPIO_PORT_I:
-      gpio = GPIOI;
-      break;
+    GPIOI,
 #endif
-  }
+#if defined(STM32F427xx) || defined(STM32F429xx) || defined(STM32F437xx) ||                         \
+    defined(STM32F439xx) || defined(STM32F469xx) || defined(STM32F479xx)
+    GPIOJ,
+    GPIOK,
+#endif
+};
 
-  return gpio;
-}
+static RCC_Periph_t periph_ports[] = {
+    RCC_PERIPH_GPIOA,
+    RCC_PERIPH_GPIOB,
+    RCC_PERIPH_GPIOC,
+#if defined(STM32F401xC) || defined(STM32F401xE) ||                                                 \
+    defined(STM32F405xx) || defined(STM32F415xx) || defined(STM32F407xx) || defined(STM32F417xx) || \
+    defined(STM32F411xE) ||                                                                         \
+    defined(STM32F412Cx) || defined(STM32F412Rx) || defined(STM32F412Vx) || defined(STM32F412Zx) || \
+    defined(STM32F413xx) ||                                                                         \
+    defined(STM32F423xx) || defined(STM32F427xx) || defined(STM32F429xx) || defined(STM32F437xx) || \
+    defined(STM32F439xx) || defined(STM32F446xx) || defined(STM32F469xx) || defined(STM32F479xx)
+    RCC_PERIPH_GPIOD,
+    RCC_PERIPH_GPIOE,
+#endif
+#if defined(STM32F405xx) || defined(STM32F415xx) || defined(STM32F407xx) || defined(STM32F417xx) || \
+    defined(STM32F412Cx) || defined(STM32F412Rx) || defined(STM32F412Vx) || defined(STM32F412Zx) || \
+    defined(STM32F413xx) ||                                                                         \
+    defined(STM32F423xx) || defined(STM32F427xx) || defined(STM32F429xx) || defined(STM32F437xx) || \
+    defined(STM32F439xx) || defined(STM32F446xx) || defined(STM32F469xx) || defined(STM32F479xx)
+    RCC_PERIPH_GPIOF,
+    RCC_PERIPH_GPIOG,
+#endif
+    RCC_PERIPH_GPIOH,
+#if defined(STM32F405xx) || defined(STM32F415xx) || defined(STM32F407xx) || defined(STM32F417xx) || \
+    defined(STM32F427xx) || defined(STM32F429xx) || defined(STM32F437xx) ||                         \
+    defined(STM32F439xx) || defined(STM32F469xx) || defined(STM32F479xx)
+    RCC_PERIPH_GPIOI,
+#endif
+#if defined(STM32F427xx) || defined(STM32F429xx) || defined(STM32F437xx) ||                         \
+    defined(STM32F439xx) || defined(STM32F469xx) || defined(STM32F479xx)
+    RCC_PERIPH_GPIOJ,
+    RCC_PERIPH_GPIOK,
+#endif
+};
+
+/*******************************************************************************
+ *  function prototypes (scope: module-local)
+ ******************************************************************************/
+
+/*******************************************************************************
+ *  function implementations (scope: module-local)
+ ******************************************************************************/
 
 /*******************************************************************************
  *  function implementations (scope: module-exported)
@@ -133,60 +137,12 @@ GPIO_TypeDef* get_gpio(GPIO_PORT_t port)
  */
 void GPIO_PortClock(GPIO_PORT_t port, GPIO_PORT_CLK_t state)
 {
-  uint32_t gpio_en;
-
-  switch (port) {
-  case GPIO_PORT_A:
-    gpio_en = RCC_AHB1ENR_GPIOAEN;
-    break;
-  case GPIO_PORT_B:
-    gpio_en = RCC_AHB1ENR_GPIOBEN;
-    break;
-  case GPIO_PORT_C:
-    gpio_en = RCC_AHB1ENR_GPIOCEN;
-    break;
-#if defined(STM32F401xC) || defined(STM32F401xE) ||                                                 \
-    defined(STM32F405xx) || defined(STM32F415xx) || defined(STM32F407xx) || defined(STM32F417xx) || \
-    defined(STM32F411xE) ||                                                                         \
-    defined(STM32F412Cx) || defined(STM32F412Rx) || defined(STM32F412Vx) || defined(STM32F412Zx) || \
-    defined(STM32F413xx) ||                                                                         \
-    defined(STM32F423xx) || defined(STM32F427xx) || defined(STM32F429xx) || defined(STM32F437xx) || \
-    defined(STM32F439xx) || defined(STM32F446xx) || defined(STM32F469xx) || defined(STM32F479xx)
-  case GPIO_PORT_D:
-    gpio_en = RCC_AHB1ENR_GPIODEN;
-    break;
-  case GPIO_PORT_E:
-    gpio_en = RCC_AHB1ENR_GPIOEEN;
-    break;
-#endif
-#if defined(STM32F405xx) || defined(STM32F415xx) || defined(STM32F407xx) || defined(STM32F417xx) || \
-    defined(STM32F412Cx) || defined(STM32F412Rx) || defined(STM32F412Vx) || defined(STM32F412Zx) || \
-    defined(STM32F413xx) ||                                                                         \
-    defined(STM32F423xx) || defined(STM32F427xx) || defined(STM32F429xx) || defined(STM32F437xx) || \
-    defined(STM32F439xx) || defined(STM32F446xx) || defined(STM32F469xx) || defined(STM32F479xx)
-  case GPIO_PORT_F:
-    gpio_en = RCC_AHB1ENR_GPIOFEN;
-    break;
-  case GPIO_PORT_G:
-    gpio_en = RCC_AHB1ENR_GPIOGEN;
-    break;
-#endif
-  case GPIO_PORT_H:
-    gpio_en = RCC_AHB1ENR_GPIOHEN;
-    break;
-#if defined(STM32F405xx) || defined(STM32F415xx) || defined(STM32F407xx) || defined(STM32F417xx) || \
-    defined(STM32F427xx) || defined(STM32F429xx) || defined(STM32F437xx) ||                         \
-    defined(STM32F439xx) || defined(STM32F469xx) || defined(STM32F479xx)
-  case GPIO_PORT_I:
-    gpio_en = RCC_AHB1ENR_GPIOIEN;
-    break;
-#endif
-  }
+  RCC_Periph_t gpio = periph_ports[port];
 
   if (state != GPIO_PORT_CLK_DISABLE)
-    RCC->AHB1ENR |= gpio_en;
+    RCC_EnablePeriph(gpio);
   else
-    RCC->AHB1ENR &= ~gpio_en;
+    RCC_DisablePeriph(gpio);
 }
 
 /**
@@ -198,57 +154,9 @@ void GPIO_PortClock(GPIO_PORT_t port, GPIO_PORT_CLK_t state)
  */
 bool GPIO_GetPortClockState(GPIO_PORT_t port)
 {
-  uint32_t gpio_en;
+  RCC_Periph_t gpio = periph_ports[port];
 
-  switch (port) {
-  case GPIO_PORT_A:
-    gpio_en = RCC_AHB1ENR_GPIOAEN;
-    break;
-  case GPIO_PORT_B:
-    gpio_en = RCC_AHB1ENR_GPIOBEN;
-    break;
-  case GPIO_PORT_C:
-    gpio_en = RCC_AHB1ENR_GPIOCEN;
-    break;
-#if defined(STM32F401xC) || defined(STM32F401xE) ||                                                 \
-    defined(STM32F405xx) || defined(STM32F415xx) || defined(STM32F407xx) || defined(STM32F417xx) || \
-    defined(STM32F411xE) ||                                                                         \
-    defined(STM32F412Cx) || defined(STM32F412Rx) || defined(STM32F412Vx) || defined(STM32F412Zx) || \
-    defined(STM32F413xx) ||                                                                         \
-    defined(STM32F423xx) || defined(STM32F427xx) || defined(STM32F429xx) || defined(STM32F437xx) || \
-    defined(STM32F439xx) || defined(STM32F446xx) || defined(STM32F469xx) || defined(STM32F479xx)
-  case GPIO_PORT_D:
-    gpio_en = RCC_AHB1ENR_GPIODEN;
-    break;
-  case GPIO_PORT_E:
-    gpio_en = RCC_AHB1ENR_GPIOEEN;
-    break;
-#endif
-#if defined(STM32F405xx) || defined(STM32F415xx) || defined(STM32F407xx) || defined(STM32F417xx) || \
-    defined(STM32F412Cx) || defined(STM32F412Rx) || defined(STM32F412Vx) || defined(STM32F412Zx) || \
-    defined(STM32F413xx) ||                                                                         \
-    defined(STM32F423xx) || defined(STM32F427xx) || defined(STM32F429xx) || defined(STM32F437xx) || \
-    defined(STM32F439xx) || defined(STM32F446xx) || defined(STM32F469xx) || defined(STM32F479xx)
-  case GPIO_PORT_F:
-    gpio_en = RCC_AHB1ENR_GPIOFEN;
-    break;
-  case GPIO_PORT_G:
-    gpio_en = RCC_AHB1ENR_GPIOGEN;
-    break;
-#endif
-  case GPIO_PORT_H:
-    gpio_en = RCC_AHB1ENR_GPIOHEN;
-    break;
-#if defined(STM32F405xx) || defined(STM32F415xx) || defined(STM32F407xx) || defined(STM32F417xx) || \
-    defined(STM32F427xx) || defined(STM32F429xx) || defined(STM32F437xx) ||                         \
-    defined(STM32F439xx) || defined(STM32F469xx) || defined(STM32F479xx)
-  case GPIO_PORT_I:
-    gpio_en = RCC_AHB1ENR_GPIOIEN;
-    break;
-#endif
-  }
-
-  return ((RCC->AHB1ENR & gpio_en) != 0UL);
+  return (RCC_GetStatePeriph(gpio) != 0UL);
 }
 
 /**
@@ -259,7 +167,7 @@ bool GPIO_GetPortClockState(GPIO_PORT_t port)
  */
 void GPIO_PinToggle(GPIO_PORT_t port, GPIO_PIN_t pin)
 {
-  GPIO_TypeDef *gpio = get_gpio(port);
+  GPIO_TypeDef *gpio = ports[port];
 
   gpio->ODR ^= (1UL << pin);
 }
@@ -273,7 +181,7 @@ void GPIO_PinToggle(GPIO_PORT_t port, GPIO_PIN_t pin)
  */
 void GPIO_PinWrite(GPIO_PORT_t port, GPIO_PIN_t pin, GPIO_PIN_OUT_t value)
 {
-  GPIO_TypeDef *gpio = get_gpio(port);
+  GPIO_TypeDef *gpio = ports[port];
   uint32_t shift = 0;
 
   if (value == GPIO_PIN_OUT_LOW)
@@ -291,7 +199,7 @@ void GPIO_PinWrite(GPIO_PORT_t port, GPIO_PIN_t pin, GPIO_PIN_OUT_t value)
  */
 uint32_t GPIO_PinRead(GPIO_PORT_t port, GPIO_PIN_t pin)
 {
-  GPIO_TypeDef *gpio = get_gpio(port);
+  GPIO_TypeDef *gpio = ports[port];
 
   return ((gpio->IDR >> pin) & 1UL);
 }
@@ -304,7 +212,7 @@ uint32_t GPIO_PinRead(GPIO_PORT_t port, GPIO_PIN_t pin)
  */
 void GPIO_PortWrite(GPIO_PORT_t port, uint16_t value)
 {
-  GPIO_TypeDef *gpio = get_gpio(port);
+  GPIO_TypeDef *gpio = ports[port];
 
   gpio->ODR = (uint32_t)value;
 }
@@ -317,7 +225,7 @@ void GPIO_PortWrite(GPIO_PORT_t port, uint16_t value)
  */
 uint16_t GPIO_PortRead(GPIO_PORT_t port)
 {
-  GPIO_TypeDef *gpio = get_gpio(port);
+  GPIO_TypeDef *gpio = ports[port];
 
   return (uint16_t)gpio->IDR;
 }
@@ -339,7 +247,7 @@ void GPIO_PinConfig(GPIO_PORT_t port, GPIO_PIN_t pin, const GPIO_PIN_CFG_t *cfg)
   if (cfg == NULL)
     return;
 
-  gpio = get_gpio(port);
+  gpio = ports[port];
   shift = (pin << 1);
 
   moder = (gpio->MODER & ~(3UL << shift));
@@ -364,7 +272,7 @@ void GPIO_AFConfig(GPIO_PORT_t port, GPIO_PIN_t pin, GPIO_PIN_FUNC_t af_num)
 {
   uint32_t afr;
   uint32_t shift = (((uint32_t)(pin & 7UL)) << 2);
-  GPIO_TypeDef *gpio = get_gpio(port);
+  GPIO_TypeDef *gpio = ports[port];
   volatile uint32_t *pafr = &gpio->AFR[pin >> 3];
 
   afr = (*pafr & ~(0xF << shift));
