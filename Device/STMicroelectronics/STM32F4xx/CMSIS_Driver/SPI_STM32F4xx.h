@@ -741,14 +741,13 @@ typedef struct _SPI_STATUS {
   uint8_t               busy;               // Transmitter/Receiver busy flag
   uint8_t               data_lost;          // Data lost: Receive overflow / Transmit underflow (cleared on start of transfer operation)
   uint8_t               mode_fault;         // Mode fault detected; optional (cleared on start of transfer operation)
-  uint8_t               reserved;           // Reserved
 } SPI_STATUS;
 
 /* SPI Information (Run-Time) */
 typedef struct _SPI_INFO {
   ARM_SPI_SignalEvent_t cb_event;           // Event Callback
   SPI_STATUS            status;             // Status flags
-  uint32_t              state;              // Current SPI state
+  uint8_t               state;              // Current SPI state
   uint32_t              mode;               // Current SPI mode
 } SPI_INFO;
 

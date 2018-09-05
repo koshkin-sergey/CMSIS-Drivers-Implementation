@@ -863,7 +863,7 @@ int32_t SPI_PowerControl(ARM_POWER_STATE state, SPI_RESOURCES *spi)
       info->status.mode_fault = 0U;
 
       /* Clear powered flag */
-      info->state &= ~((uint32_t)SPI_POWERED);
+      info->state &= ~SPI_POWERED;
       break;
 
     case ARM_POWER_FULL:
@@ -996,10 +996,11 @@ int32_t SPI_Send(const void *data, uint32_t num, SPI_RESOURCES *spi)
     /* RX Buffer DMA enable */
     cr2 |= SPI_CR2_RXDMAEN;
   }
+  else
 #endif
   {
-    // Interrupt mode
-    // RX Buffer not empty interrupt enable
+    /* Interrupt mode */
+    /* RX Buffer not empty interrupt enable */
     cr2 |= SPI_CR2_RXNEIE;
   }
 
@@ -1095,7 +1096,7 @@ int32_t SPI_Receive(void *data, uint32_t num, SPI_RESOURCES *spi)
 #ifdef SPI_DMA_RX
   /* DMA mode */
   if (spi->rx_dma != NULL) {
-    /* Prepare DMA to receive dummy RX data */
+    /* Prepare DMA to receive RX data */
     DMA_StreamConfig_t *cfg = &spi->rx_dma->handle->config;
 
     cfg->MemInc = DMA_MINC_ENABLE;
@@ -1118,10 +1119,11 @@ int32_t SPI_Receive(void *data, uint32_t num, SPI_RESOURCES *spi)
     /* RX Buffer DMA enable */
     cr2 |= SPI_CR2_RXDMAEN;
   }
+  else
 #endif
   {
-    // Interrupt mode
-    // RX Buffer not empty interrupt enable
+    /* Interrupt mode */
+    /* RX Buffer not empty interrupt enable */
     cr2 |= SPI_CR2_RXNEIE;
   }
 
@@ -1394,20 +1396,20 @@ int32_t SPI_Control(uint32_t control, uint32_t arg, SPI_RESOURCES *spi)
       return ARM_SPI_ERROR_MODE;
 
     case ARM_SPI_SET_BUS_SPEED:
-      // Set SPI Bus Speed
+      /* Set SPI Bus Speed */
       br = CalcPrescalerValue(spi, arg);
       if (br < 0)
-        return ARM_DRIVER_ERROR;
+        return (ARM_DRIVER_ERROR);
 
-      // Disable SPI, update prescaler and enable SPI
+      /* Disable SPI, update prescaler and enable SPI */
       reg->CR1 &= ~SPI_CR1_SPE;
       reg->CR1 = (reg->CR1 & ~SPI_CR1_BR_Msk) | (br << SPI_CR1_BR_Pos);
       reg->CR1 |= SPI_CR1_SPE;
-      return ARM_DRIVER_OK;
+      return (ARM_DRIVER_OK);
 
     case ARM_SPI_GET_BUS_SPEED:
-      // Return current bus speed
-      return (int32_t)(RCC_GetPeriphFreq(spi->rcc) >> (((reg->CR1 & SPI_CR1_BR) >> 3U) + 1U));
+      /* Return current bus speed */
+      return (int32_t)(RCC_GetPeriphFreq(spi->rcc) >> (((reg->CR1 & SPI_CR1_BR_Msk) >> SPI_CR1_BR_Pos) + 1U));
 
     case ARM_SPI_SET_DEFAULT_TX_VALUE:
       spi->xfer->def_val = (uint16_t)(arg & 0xFFFFU);
@@ -1438,7 +1440,7 @@ int32_t SPI_Control(uint32_t control, uint32_t arg, SPI_RESOURCES *spi)
       else if (val == ARM_SPI_MODE_SLAVE) {
         val = info->mode & ARM_SPI_SS_SLAVE_MODE_Msk;
         // Check if slave select slave mode is selected
-        if (val == ARM_SPI_SS_MASTER_SW) {
+        if (val == ARM_SPI_SS_SLAVE_SW) {
           if (arg == ARM_SPI_SS_ACTIVE) {
             reg->CR1 |= SPI_CR1_SSI;
           }
@@ -1604,7 +1606,7 @@ int32_t SPI_Control(uint32_t control, uint32_t arg, SPI_RESOURCES *spi)
   reg->CR1 = cr1;
 
   if ((mode & ARM_SPI_CONTROL_Msk) == ARM_SPI_MODE_INACTIVE) {
-    info->state &= ~((uint32_t)SPI_CONFIGURED);
+    info->state &= ~SPI_CONFIGURED;
   }
   else {
     info->state |= SPI_CONFIGURED;
@@ -1651,7 +1653,7 @@ void SPI_IRQHandler(SPI_RESOURCES *spi)
 
   event = 0U;
 
-  /* Save control register 2 */
+  /* Save control register 1 */
   cr1 = reg->CR1;
   /* Save control register 2 */
   cr2 = reg->CR2;
