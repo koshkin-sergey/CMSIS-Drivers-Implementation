@@ -14,19 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Project: EXTI Driver for STMicroelectronics STM32F4xx
+ * Project: EXTI Driver for STMicroelectronics STM32F1xx
  */
 
 /*******************************************************************************
  *  includes
  ******************************************************************************/
 
-#include "EXTI_STM32F4xx.h"
-
+#include "EXTI_STM32F10x.h"
 #include <stddef.h>
 
-#include "stm32f4xx.h"
-#include "RCC_STM32F4xx.h"
+#include "stm32f1xx.h"
+#include "RCC_STM32F10x.h"
 #include "Config/RTE_Device.h"
 
 /*******************************************************************************
@@ -80,11 +79,14 @@ static EXTI_Resources_t exti = {
         EXTI15_10_IRQn,
         PVD_IRQn,
         RTC_Alarm_IRQn,
-        OTG_FS_WKUP_IRQn,
-        ETH_WKUP_IRQn,
-        OTG_HS_WKUP_IRQn,
-        TAMP_STAMP_IRQn,
-        RTC_WKUP_IRQn,
+#if defined(STM32F102x6) && !defined(STM32F102xB) ||                                                  \
+    defined(STM32F103x6) && !defined(STM32F103xB) || defined(STM32F103xE) && !defined(STM32F103xG) || \
+    defined(STM32F105xC) && !defined(STM32F107xC)
+        USBWakeUp_IRQn,
+#if defined(STM32F105xC) || defined(STM32F107xC)
+        ETH_WKUP_IRQn
+#endif
+#endif
     },
     &EXTI_Info
 };
@@ -218,15 +220,17 @@ void EXTI_LineMapping(EXTI_Line_t line, EXTI_Port_t port)
   uint32_t value, reg_num, offset;
 
   if (line <= EXTI_LINE_15) {
-    /* Enable SYSCFG clock */
-    RCC_EnablePeriph(RCC_PERIPH_SYSCFG);
+    /* Enable AFIO peripheral clock */
+    if (RCC_GetStatePeriph(RCC_PERIPH_AFIO) == 0UL) {
+      RCC_EnablePeriph(RCC_PERIPH_AFIO);
+    }
 
     reg_num = line >> 2U;
     offset = ((uint32_t)line & 3U) << 2U;
 
     /* Configure external line mapping */
-    value = SYSCFG->EXTICR[reg_num] & ~(0x0F << offset);
-    SYSCFG->EXTICR[reg_num] = value | (port << offset);
+    value = AFIO->EXTICR[reg_num] & ~(0x0F << offset);
+    AFIO->EXTICR[reg_num] = value | (port << offset);
   }
 }
 
@@ -254,24 +258,6 @@ void PVD_IRQHandler(void)
 }
 
 /**
- * @fn          void TAMP_STAMP_IRQHandler(void)
- * @brief       Tamper and TimeStamps through the EXTI line
- */
-void TAMP_STAMP_IRQHandler(void)
-{
-  EXTI_IRQHandler(EXTI_RTC_TAMPER_STAMP);
-}
-
-/**
- * @fn          void RTC_WKUP_IRQHandler(void)
- * @brief       RTC Wakeup through the EXTI line
- */
-void RTC_WKUP_IRQHandler(void)
-{
-  EXTI_IRQHandler(EXTI_RTC_WAKEUP);
-}
-
-/**
  * @fn          void RTC_Alarm_IRQHandler(void)
  * @brief       RTC Alarm (A and B) through EXTI Line
  */
@@ -281,14 +267,15 @@ void RTC_Alarm_IRQHandler(void)
 }
 
 /**
- * @fn          void OTG_FS_WKUP_IRQHandler(void)
- * @brief       USB OTG FS Wakeup through EXTI line
+ * @fn          void USBWakeUp_IRQHandler(void)
+ * @brief       USB Wakeup through EXTI line
  */
-void OTG_FS_WKUP_IRQHandler(void)
+void USBWakeUp_IRQHandler(void)
 {
-  EXTI_IRQHandler(EXTI_USB_OTG_FS_WAKEUP);
+  EXTI_IRQHandler(EXTI_USB_WAKEUP);
 }
 
+#if defined(STM32F105xC) || defined(STM32F107xC)
 /**
  * @fn          void ETH_WKUP_IRQHandler(void)
  * @brief       Ethernet Wakeup through EXTI line
@@ -297,15 +284,7 @@ void ETH_WKUP_IRQHandler(void)
 {
   EXTI_IRQHandler(EXTI_ETHERNET_WAKEUP);
 }
-
-/**
- * @fn          void OTG_HS_WKUP_IRQHandler(void)
- * @brief       USB OTG HS Wakeup through EXTI
- */
-void OTG_HS_WKUP_IRQHandler(void)
-{
-  EXTI_IRQHandler(EXTI_USB_OTG_HS_WAKEUP);
-}
+#endif
 
 /**
  * @fn          void EXTI0_IRQHandler(void)
