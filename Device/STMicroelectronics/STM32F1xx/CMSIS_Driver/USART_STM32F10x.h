@@ -394,8 +394,8 @@ typedef const DMA_INFO USART_DMA;
 
 /* USART pin */
 typedef const struct _USART_PIN {
-  GPIO_TypeDef         *port;           // Port
-  uint16_t              pin;            // Pin
+  GPIO_PORT_t           port;           // Port
+  GPIO_PIN_t            pin;            // Pin
 } USART_PIN;
 
 /* USART Input/Output Configuration */
