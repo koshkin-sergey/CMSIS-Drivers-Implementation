@@ -23,6 +23,8 @@
 
 #include "USART_STM32F10x.h"
 
+#if defined(USE_USART1) || defined(USE_USART2) || defined(USE_USART3) || defined(USE_UART4) || defined(USE_UART5)
+
 /*******************************************************************************
  *  external declarations
  ******************************************************************************/
@@ -2123,7 +2125,6 @@ void USART_RX_DMA_Complete(const USART_RESOURCES *usart)
 }
 #endif
 
-
 #ifdef USE_USART1
 /* USART1 Driver Wrapper functions */
 static ARM_USART_CAPABILITIES  USART1_GetCapabilities (void)                                                { return USART_GetCapabilities (&USART1_Resources); }
@@ -2165,7 +2166,7 @@ ARM_DRIVER_USART Driver_USART1 = {
     USART1_SetModemControl,
     USART1_GetModemStatus
 };
-#endif
+#endif  /* USE_USART1 */
 
 #ifdef USE_USART2
 /* USART2 Driver Wrapper functions */
@@ -2208,7 +2209,7 @@ ARM_DRIVER_USART Driver_USART2 = {
     USART2_SetModemControl,
     USART2_GetModemStatus
 };
-#endif
+#endif  /* USE_USART2 */
 
 #ifdef USE_USART3
 /* USART3 Driver Wrapper functions */
@@ -2251,7 +2252,7 @@ ARM_DRIVER_USART Driver_USART3 = {
     USART3_SetModemControl,
     USART3_GetModemStatus
 };
-#endif
+#endif  /* USE_USART3 */
 
 #ifdef USE_UART4
 /* USART4 Driver Wrapper functions */
@@ -2294,7 +2295,7 @@ ARM_DRIVER_USART Driver_USART4 = {
     USART4_SetModemControl,
     USART4_GetModemStatus
 };
-#endif
+#endif  /* USE_UART4 */
 
 #ifdef USE_UART5
 /* USART5 Driver Wrapper functions */
@@ -2337,6 +2338,8 @@ ARM_DRIVER_USART Driver_USART5 = {
     USART5_SetModemControl,
     USART5_GetModemStatus
 };
+#endif  /* USE_UART5 */
+
 #endif
 
 /* ----------------------------- End of file ---------------------------------*/

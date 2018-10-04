@@ -23,6 +23,8 @@
 
 #include "SPI_STM32F10x.h"
 
+#if defined(USE_SPI1) || defined(USE_SPI2) || defined(USE_SPI3)
+
 /*******************************************************************************
  *  external declarations
  ******************************************************************************/
@@ -639,8 +641,9 @@ int32_t SPI_Receive(void *data, uint32_t num, const SPI_RESOURCES *spi)
   SPI_INFO *info = spi->info;
   SPI_TRANSFER_INFO *xfer = spi->xfer;
   SPI_TypeDef *reg = spi->reg;
-  uint32_t cr1, cr2;
+  uint32_t cr2;
 #ifdef __SPI_DMA
+  uint32_t cr1;
   uint32_t cfg;
 #endif
 
@@ -653,7 +656,9 @@ int32_t SPI_Receive(void *data, uint32_t num, const SPI_RESOURCES *spi)
   if (info->status.busy)
     return (ARM_DRIVER_ERROR_BUSY);
 
+#ifdef __SPI_DMA
   cr1 = reg->CR1;
+#endif
   cr2 = reg->CR2;
 
   /* Update SPI statuses */
@@ -1424,5 +1429,7 @@ ARM_DRIVER_SPI Driver_SPI3 = {
   SPI3_GetStatus
 };
 #endif  /* USE_SPI3 */
+
+#endif
 
 /* ----------------------------- End of file ---------------------------------*/
