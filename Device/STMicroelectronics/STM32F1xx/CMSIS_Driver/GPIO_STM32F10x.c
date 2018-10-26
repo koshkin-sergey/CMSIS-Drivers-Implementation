@@ -48,27 +48,41 @@
  *  global variable definitions (scope: module-local)
  ******************************************************************************/
 
-static GPIO_TypeDef* ports[] = {
+static GPIO_TypeDef* const ports[] = {
     GPIOA,
     GPIOB,
     GPIOC,
     GPIOD,
+#if defined(STM32F100xB) || defined(STM32F100xE) ||                         \
+    defined(STM32F101xB) || defined(STM32F101xE) || defined(STM32F101xG) || \
+    defined(STM32F103xB) || defined(STM32F103xE) || defined(STM32F103xG) || \
+    defined(STM32F105xC) || defined(STM32F107xC)
     GPIOE,
-#if !defined(STM32F105xC) && !defined(STM32F107xC)
+#if defined(STM32F100xE) ||                         \
+    defined(STM32F101xE) || defined(STM32F101xG) || \
+    defined(STM32F103xE) || defined(STM32F103xG)
     GPIOF,
     GPIOG,
 #endif
+#endif
 };
 
-static RCC_Periph_t periph_ports[] = {
+static const RCC_Periph_t periph_ports[] = {
     RCC_PERIPH_GPIOA,
     RCC_PERIPH_GPIOB,
     RCC_PERIPH_GPIOC,
     RCC_PERIPH_GPIOD,
+#if defined(STM32F100xB) || defined(STM32F100xE) ||                         \
+    defined(STM32F101xB) || defined(STM32F101xE) || defined(STM32F101xG) || \
+    defined(STM32F103xB) || defined(STM32F103xE) || defined(STM32F103xG) || \
+    defined(STM32F105xC) || defined(STM32F107xC)
     RCC_PERIPH_GPIOE,
-#if !defined(STM32F105xC) && !defined(STM32F107xC)
+#if defined(STM32F100xE) ||                         \
+    defined(STM32F101xE) || defined(STM32F101xG) || \
+    defined(STM32F103xE) || defined(STM32F103xG)
     RCC_PERIPH_GPIOF,
     RCC_PERIPH_GPIOG,
+#endif
 #endif
 };
 

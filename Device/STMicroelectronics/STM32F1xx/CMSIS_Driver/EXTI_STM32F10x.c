@@ -79,11 +79,11 @@ static EXTI_Resources_t exti = {
         EXTI15_10_IRQn,
         PVD_IRQn,
         RTC_Alarm_IRQn,
-#if defined(STM32F102x6) && !defined(STM32F102xB) ||                                                  \
-    defined(STM32F103x6) && !defined(STM32F103xB) || defined(STM32F103xE) && !defined(STM32F103xG) || \
-    defined(STM32F105xC) && !defined(STM32F107xC)
+#if defined(STM32F102x6) || defined(STM32F102xB) ||                                                  \
+    defined(STM32F103x6) || defined(STM32F103xB) || defined(STM32F103xE) || defined(STM32F103xG) || \
+    defined(STM32F105xC) || defined(STM32F107xC)
         USBWakeUp_IRQn,
-#if defined(STM32F105xC) || defined(STM32F107xC)
+#if defined(STM32F107xC)
         ETH_WKUP_IRQn
 #endif
 #endif

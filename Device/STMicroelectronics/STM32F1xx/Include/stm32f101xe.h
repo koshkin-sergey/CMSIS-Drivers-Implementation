@@ -6819,15 +6819,17 @@ typedef struct
 /******************************************************************************/
 
 /* Aliases for __IRQn */
-#define ADC1_2_IRQn        ADC1_IRQn
-#define DMA2_Channel4_IRQn DMA2_Channel4_5_IRQn
-#define TIM6_DAC_IRQn      TIM6_IRQn
+#define ADC1_2_IRQn               ADC1_IRQn
+#define DMA2_Channel4_IRQn        DMA2_Channel4_5_IRQn
+#define DMA2_Channel5_IRQn        DMA2_Channel4_5_IRQn
+#define TIM6_DAC_IRQn             TIM6_IRQn
 
 
 /* Aliases for __IRQHandler */
-#define ADC1_2_IRQHandler        ADC1_IRQHandler
-#define DMA2_Channel4_IRQHandler DMA2_Channel4_5_IRQHandler
-#define TIM6_DAC_IRQHandler      TIM6_IRQHandler
+#define ADC1_2_IRQHandler         ADC1_IRQHandler
+#define DMA2_Channel4_IRQHandler  DMA2_Channel4_5_IRQHandler
+#define DMA2_Channel5_IRQHandler  DMA2_Channel4_5_IRQHandler
+#define TIM6_DAC_IRQHandler       TIM6_IRQHandler
 
 
 /**

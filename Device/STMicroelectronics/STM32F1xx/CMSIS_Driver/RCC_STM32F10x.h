@@ -40,6 +40,9 @@
 #define RCC_HSE_ON                      (1U)
 #define RCC_HSE_BYPASS                  (2U)
 
+#define RCC_LSI_OFF                     (0U)
+#define RCC_LSI_ON                      (1U)
+
 #define RCC_PLL_NONE                    (0U)
 #define RCC_PLL_ON                      (1U)
 #define RCC_PLL_OFF                     (2U)

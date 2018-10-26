@@ -185,7 +185,18 @@ void RCC_OscInit(const RCC_OscInit_t *init)
 
   /* LSI Configuration */
   if (init->OSC_Type & RCC_OSC_TYPE_LSI) {
+    switch (init->LSI_State) {
+      case RCC_HSE_ON:
+        RCC->CSR |= RCC_CSR_LSION;
+        while ((RCC->CSR & RCC_CSR_LSIRDY) == 0U);
+        break;
 
+      case RCC_LSI_OFF:
+      default:
+        RCC->CSR &= ~RCC_CSR_LSION;
+        while ((RCC->CSR & RCC_CSR_LSIRDY) != 0U);
+        break;
+    }
   }
 
   /* PLL Configuration */
@@ -347,23 +358,37 @@ uint32_t RCC_GetFreq(RCC_FREQ_t type)
  * @fn        uint32_t RCC_GetPeriphFreq(RCC_Periph_t periph)
  * @brief     Get Periph Clock Frequency
  * @param[in] type  @ref RCC_Periph_t
- * @return    Returns Perith clock frequency in Hz
+ * @return    Returns Periph clock frequency in Hz
  */
 uint32_t RCC_GetPeriphFreq(RCC_Periph_t periph)
 {
-  RCC_FREQ_t type;
+  uint32_t clk = 0U;
+  uint32_t rcc_cfgr = RCC->CFGR;
 
   if (((periph & RCC_PERIPH_APB1_MASK) == RCC_PERIPH_APB1_MASK)) {
-    type = RCC_FREQ_APB1;
+    clk = RCC_GetFreq(RCC_FREQ_APB1);
+    if (((rcc_cfgr & RCC_CFGR_PPRE1_Msk) != RCC_CFGR_PPRE1_DIV1) &&
+        ((periph == RCC_PERIPH_TIM2) || (periph == RCC_PERIPH_TIM3) || (periph == RCC_PERIPH_TIM4) ||
+         (periph == RCC_PERIPH_TIM5) || (periph == RCC_PERIPH_TIM6) || (periph == RCC_PERIPH_TIM7) ||
+         (periph == RCC_PERIPH_TIM12) || (periph == RCC_PERIPH_TIM13) || (periph == RCC_PERIPH_TIM14)))
+    {
+      clk <<= 1U;
+    }
   }
   else if (((periph & RCC_PERIPH_APB2_MASK) == RCC_PERIPH_APB2_MASK)) {
-    type = RCC_FREQ_APB2;
+    clk = RCC_GetFreq(RCC_FREQ_APB2);
+    if (((rcc_cfgr & RCC_CFGR_PPRE2_Msk) != RCC_CFGR_PPRE2_DIV1) &&
+        ((periph == RCC_PERIPH_TIM1) || (periph == RCC_PERIPH_TIM8) || (periph == RCC_PERIPH_TIM9) ||
+         (periph == RCC_PERIPH_TIM10) || (periph == RCC_PERIPH_TIM11)))
+    {
+      clk <<= 1U;
+    }
   }
   else {
-    type = RCC_FREQ_AHB;
+    clk = RCC_GetFreq(RCC_FREQ_AHB);
   }
 
-  return RCC_GetFreq(type);
+  return clk;
 }
 
 /**

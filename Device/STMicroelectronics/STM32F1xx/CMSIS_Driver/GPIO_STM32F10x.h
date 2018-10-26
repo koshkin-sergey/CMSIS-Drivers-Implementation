@@ -39,10 +39,17 @@ typedef enum {
   GPIO_PORT_B   = 1,
   GPIO_PORT_C   = 2,
   GPIO_PORT_D   = 3,
+#if defined(STM32F100xB) || defined(STM32F100xE) ||                         \
+    defined(STM32F101xB) || defined(STM32F101xE) || defined(STM32F101xG) || \
+    defined(STM32F103xB) || defined(STM32F103xE) || defined(STM32F103xG) || \
+    defined(STM32F105xC) || defined(STM32F107xC)
   GPIO_PORT_E   = 4,
-#if !defined(STM32F105xC) && !defined(STM32F107xC)
+#if defined(STM32F100xE) ||                         \
+    defined(STM32F101xE) || defined(STM32F101xG) || \
+    defined(STM32F103xE) || defined(STM32F103xG)
   GPIO_PORT_F   = 5,
   GPIO_PORT_G   = 6,
+#endif
 #endif
   GPIO_PORT_Reserved = 0x7FFFFFFF,
 } GPIO_PORT_t;

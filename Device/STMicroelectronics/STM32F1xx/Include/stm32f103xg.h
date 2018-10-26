@@ -11890,6 +11890,7 @@ typedef struct
 /* Aliases for __IRQn */
 #define ADC1_IRQn               ADC1_2_IRQn
 #define DMA2_Channel4_IRQn      DMA2_Channel4_5_IRQn
+#define DMA2_Channel5_IRQn      DMA2_Channel4_5_IRQn
 #define TIM1_BRK_IRQn           TIM1_BRK_TIM9_IRQn
 #define TIM1_BRK_TIM15_IRQn     TIM1_BRK_TIM9_IRQn
 #define TIM9_IRQn               TIM1_BRK_TIM9_IRQn
@@ -11917,6 +11918,7 @@ typedef struct
 /* Aliases for __IRQHandler */
 #define ADC1_IRQHandler               ADC1_2_IRQHandler
 #define DMA2_Channel4_IRQHandler      DMA2_Channel4_5_IRQHandler
+#define DMA2_Channel5_IRQHandler      DMA2_Channel4_5_IRQHandler
 #define TIM1_BRK_IRQHandler           TIM1_BRK_TIM9_IRQHandler
 #define TIM1_BRK_TIM15_IRQHandler     TIM1_BRK_TIM9_IRQHandler
 #define TIM9_IRQHandler               TIM1_BRK_TIM9_IRQHandler

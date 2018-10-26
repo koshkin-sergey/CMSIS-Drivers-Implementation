@@ -34,6 +34,11 @@
 
 #include "Config/RTE_Device.h"
 
+#if defined(STM32F100xB) || defined(STM32F100xE) || \
+    defined(STM32F101xE) || defined(STM32F101xG) || \
+    defined(STM32F103xE) || defined(STM32F103xG) || \
+    defined(STM32F105xC) || defined(STM32F107xC)
+
 /*******************************************************************************
  *  defines and macros (scope: module-local)
  ******************************************************************************/
@@ -118,7 +123,7 @@ typedef const struct _DAC_PIN {
   GPIO_PIN_t            pin;            /* Pin  */
 } DAC_PIN;
 
-/* SPI Input/Output Configuration */
+/* DAC Input/Output Configuration */
 typedef const struct _DAC_IO {
   DAC_PIN              *ch1_out;        /* Pointer to channel 1 out pin configuration */
   DAC_PIN              *ch2_out;        /* Pointer to channel 2 out pin configuration */
@@ -160,6 +165,8 @@ typedef struct _DAC_RESOURCES {
   DAC_INFO             *info;           /* Run-Time Information     */
   DAC_TRANSFER_INFO    *xfer;           /* DAC transfer information */
 } DAC_RESOURCES;
+
+#endif
 
 #endif /* DAC_STM32F10X_H_ */
 
