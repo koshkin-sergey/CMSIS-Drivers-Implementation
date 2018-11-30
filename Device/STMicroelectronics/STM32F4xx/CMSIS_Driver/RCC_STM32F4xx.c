@@ -236,12 +236,11 @@ void RCC_ClkInit(RCC_ClkInit_t *init, uint32_t flash_latency)
  */
 uint32_t RCC_GetFreq(RCC_FREQ_t type)
 {
-  switch (type) {
-    case RCC_FREQ_HSI:
-      return RTE_HSI;
-    case RCC_FREQ_HSE:
-      return RTE_HSE;
-  }
+  if (type == RCC_FREQ_HSI)
+    return RTE_HSI;
+
+  if (type == RCC_FREQ_HSE)
+    return RTE_HSE;
 
   uint32_t sysclk;
   uint32_t rcc_cfgr = RCC->CFGR;
