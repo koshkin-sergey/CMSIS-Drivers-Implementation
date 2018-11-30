@@ -1053,6 +1053,7 @@ static const USART_RESOURCES USART10_Resources = {
  *  function prototypes (scope: module-local)
  ******************************************************************************/
 
+static
 int32_t USART_Receive(void *data, uint32_t num, USART_RESOURCES *usart);
 
 /*******************************************************************************
