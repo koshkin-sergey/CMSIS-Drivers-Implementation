@@ -358,7 +358,11 @@
   #define RTE_USART3_CK                 1
   #define RTE_USART3_CK_PORT            GPIO_PORT_B
   #define RTE_USART3_CK_PIN             GPIO_PIN_12
-  #define RTE_USART3_CK_FUNC            GPIO_PIN_FUNC_7
+  #if defined (STM32F413xx) || defined (STM32F423xx)
+    #define RTE_USART3_CK_FUNC          GPIO_PIN_FUNC_8
+  #else
+    #define RTE_USART3_CK_FUNC          GPIO_PIN_FUNC_7
+  #endif
 #elif    (RTE_USART3_CK_ID == 2)
   #define RTE_USART3_CK                 1
   #define RTE_USART3_CK_PORT            GPIO_PORT_C
@@ -381,7 +385,11 @@
   #define RTE_USART3_CTS                1
   #define RTE_USART3_CTS_PORT           GPIO_PORT_B
   #define RTE_USART3_CTS_PIN            GPIO_PIN_13
-  #define RTE_USART3_CTS_FUNC           GPIO_PIN_FUNC_7
+  #if defined (STM32F413xx) || defined (STM32F423xx)
+    #define RTE_USART3_CTS_FUNC         GPIO_PIN_FUNC_8
+  #else
+    #define RTE_USART3_CTS_FUNC         GPIO_PIN_FUNC_7
+  #endif
 #elif    (RTE_USART3_CTS_ID == 2)
   #define RTE_USART3_CTS                1
   #define RTE_USART3_CTS_PORT           GPIO_PORT_D
@@ -455,27 +463,27 @@
   #define RTE_UART4_TX                  1
   #define RTE_UART4_TX_PORT             GPIO_PORT_A
   #define RTE_UART4_TX_PIN              GPIO_PIN_0
-  #define RTE_UART4_TX_FUNC             GPIO_PIN_FUNC_7
+  #define RTE_UART4_TX_FUNC             GPIO_PIN_FUNC_8
 #elif    (RTE_UART4_TX_ID == 2)
   #define RTE_UART4_TX                  1
   #define RTE_UART4_TX_PORT             GPIO_PORT_C
   #define RTE_UART4_TX_PIN              GPIO_PIN_10
-  #define RTE_UART4_TX_FUNC             GPIO_PIN_FUNC_7
+  #define RTE_UART4_TX_FUNC             GPIO_PIN_FUNC_8
 #elif    (RTE_UART4_TX_ID == 3)
   #define RTE_UART4_TX                  1
   #define RTE_UART4_TX_PORT             GPIO_PORT_D
   #define RTE_UART4_TX_PIN              GPIO_PIN_10
-  #define RTE_UART4_TX_FUNC             GPIO_PIN_FUNC_7
+  #define RTE_UART4_TX_FUNC             GPIO_PIN_FUNC_8
 #elif    (RTE_UART4_TX_ID == 4)
   #define RTE_UART4_TX                  1
   #define RTE_UART4_TX_PORT             GPIO_PORT_A
   #define RTE_UART4_TX_PIN              GPIO_PIN_12
-  #define RTE_UART4_TX_FUNC             GPIO_PIN_FUNC_7
+  #define RTE_UART4_TX_FUNC             GPIO_PIN_FUNC_11
 #elif    (RTE_UART4_TX_ID == 5)
   #define RTE_UART4_TX                  1
   #define RTE_UART4_TX_PORT             GPIO_PORT_D
   #define RTE_UART4_TX_PIN              GPIO_PIN_1
-  #define RTE_UART4_TX_FUNC             GPIO_PIN_FUNC_7
+  #define RTE_UART4_TX_FUNC             GPIO_PIN_FUNC_11
 #else
   #error "Invalid UART4_TX Pin Configuration!"
 #endif
@@ -488,22 +496,22 @@
   #define RTE_UART4_RX                  1
   #define RTE_UART4_RX_PORT             GPIO_PORT_A
   #define RTE_UART4_RX_PIN              GPIO_PIN_1
-  #define RTE_UART4_RX_FUNC             GPIO_PIN_FUNC_7
+  #define RTE_UART4_RX_FUNC             GPIO_PIN_FUNC_8
 #elif    (RTE_UART4_RX_ID == 2)
   #define RTE_UART4_RX                  1
   #define RTE_UART4_RX_PORT             GPIO_PORT_C
   #define RTE_UART4_RX_PIN              GPIO_PIN_11
-  #define RTE_UART4_RX_FUNC             GPIO_PIN_FUNC_7
+  #define RTE_UART4_RX_FUNC             GPIO_PIN_FUNC_8
 #elif    (RTE_UART4_RX_ID == 3)
   #define RTE_UART4_RX                  1
   #define RTE_UART4_RX_PORT             GPIO_PORT_A
   #define RTE_UART4_RX_PIN              GPIO_PIN_11
-  #define RTE_UART4_RX_FUNC             GPIO_PIN_FUNC_7
+  #define RTE_UART4_RX_FUNC             GPIO_PIN_FUNC_11
 #elif    (RTE_UART4_RX_ID == 4)
   #define RTE_UART4_RX                  1
   #define RTE_UART4_RX_PORT             GPIO_PORT_D
   #define RTE_UART4_RX_PIN              GPIO_PIN_0
-  #define RTE_UART4_RX_FUNC             GPIO_PIN_FUNC_7
+  #define RTE_UART4_RX_FUNC             GPIO_PIN_FUNC_11
 #else
   #error "Invalid UART4_RX Pin Configuration!"
 #endif
@@ -554,22 +562,22 @@
   #define RTE_UART5_TX                  1
   #define RTE_UART5_TX_PORT             GPIO_PORT_C
   #define RTE_UART5_TX_PIN              GPIO_PIN_12
-  #define RTE_UART5_TX_FUNC             GPIO_PIN_FUNC_7
+  #define RTE_UART5_TX_FUNC             GPIO_PIN_FUNC_8
 #elif    (RTE_UART5_TX_ID == 2)
   #define RTE_UART5_TX                  1
   #define RTE_UART5_TX_PORT             GPIO_PORT_B
   #define RTE_UART5_TX_PIN              GPIO_PIN_6
-  #define RTE_UART5_TX_FUNC             GPIO_PIN_FUNC_7
+  #define RTE_UART5_TX_FUNC             GPIO_PIN_FUNC_11
 #elif    (RTE_UART5_TX_ID == 3)
   #define RTE_UART5_TX                  1
   #define RTE_UART5_TX_PORT             GPIO_PORT_B
   #define RTE_UART5_TX_PIN              GPIO_PIN_9
-  #define RTE_UART5_TX_FUNC             GPIO_PIN_FUNC_7
+  #define RTE_UART5_TX_FUNC             GPIO_PIN_FUNC_11
 #elif    (RTE_UART5_TX_ID == 4)
   #define RTE_UART5_TX                  1
   #define RTE_UART5_TX_PORT             GPIO_PORT_B
   #define RTE_UART5_TX_PIN              GPIO_PIN_13
-  #define RTE_UART5_TX_FUNC             GPIO_PIN_FUNC_7
+  #define RTE_UART5_TX_FUNC             GPIO_PIN_FUNC_11
 #else
   #error "Invalid UART5_TX Pin Configuration!"
 #endif
@@ -582,22 +590,22 @@
   #define RTE_UART5_RX                  1
   #define RTE_UART5_RX_PORT             GPIO_PORT_D
   #define RTE_UART5_RX_PIN              GPIO_PIN_2
-  #define RTE_UART5_RX_FUNC             GPIO_PIN_FUNC_7
+  #define RTE_UART5_RX_FUNC             GPIO_PIN_FUNC_8
 #elif    (RTE_UART5_RX_ID == 2)
   #define RTE_UART5_RX                  1
   #define RTE_UART5_RX_PORT             GPIO_PORT_B
   #define RTE_UART5_RX_PIN              GPIO_PIN_5
-  #define RTE_UART5_RX_FUNC             GPIO_PIN_FUNC_7
+  #define RTE_UART5_RX_FUNC             GPIO_PIN_FUNC_11
 #elif    (RTE_UART5_RX_ID == 3)
   #define RTE_UART5_RX                  1
   #define RTE_UART5_RX_PORT             GPIO_PORT_B
   #define RTE_UART5_RX_PIN              GPIO_PIN_8
-  #define RTE_UART5_RX_FUNC             GPIO_PIN_FUNC_7
+  #define RTE_UART5_RX_FUNC             GPIO_PIN_FUNC_11
 #elif    (RTE_UART5_RX_ID == 4)
   #define RTE_UART5_RX                  1
   #define RTE_UART5_RX_PORT             GPIO_PORT_B
   #define RTE_UART5_RX_PIN              GPIO_PIN_12
-  #define RTE_UART5_RX_FUNC             GPIO_PIN_FUNC_7
+  #define RTE_UART5_RX_FUNC             GPIO_PIN_FUNC_11
 #else
   #error "Invalid UART5_RX Pin Configuration!"
 #endif
@@ -648,17 +656,17 @@
   #define RTE_USART6_TX                 1
   #define RTE_USART6_TX_PORT            GPIO_PORT_A
   #define RTE_USART6_TX_PIN             GPIO_PIN_11
-  #define RTE_USART6_TX_FUNC            GPIO_PIN_FUNC_7
+  #define RTE_USART6_TX_FUNC            GPIO_PIN_FUNC_8
 #elif    (RTE_USART6_TX_ID == 2)
   #define RTE_USART6_TX                 1
   #define RTE_USART6_TX_PORT            GPIO_PORT_C
   #define RTE_USART6_TX_PIN             GPIO_PIN_6
-  #define RTE_USART6_TX_FUNC            GPIO_PIN_FUNC_7
+  #define RTE_USART6_TX_FUNC            GPIO_PIN_FUNC_8
 #elif    (RTE_USART6_TX_ID == 3)
   #define RTE_USART6_TX                 1
   #define RTE_USART6_TX_PORT            GPIO_PORT_G
   #define RTE_USART6_TX_PIN             GPIO_PIN_14
-  #define RTE_USART6_TX_FUNC            GPIO_PIN_FUNC_7
+  #define RTE_USART6_TX_FUNC            GPIO_PIN_FUNC_8
 #else
   #error "Invalid USART6_TX Pin Configuration!"
 #endif
@@ -671,17 +679,17 @@
   #define RTE_USART6_RX                 1
   #define RTE_USART6_RX_PORT            GPIO_PORT_A
   #define RTE_USART6_RX_PIN             GPIO_PIN_12
-  #define RTE_USART6_RX_FUNC            GPIO_PIN_FUNC_7
+  #define RTE_USART6_RX_FUNC            GPIO_PIN_FUNC_8
 #elif    (RTE_USART6_RX_ID == 2)
   #define RTE_USART6_RX                 1
   #define RTE_USART6_RX_PORT            GPIO_PORT_C
   #define RTE_USART6_RX_PIN             GPIO_PIN_7
-  #define RTE_USART6_RX_FUNC            GPIO_PIN_FUNC_7
+  #define RTE_USART6_RX_FUNC            GPIO_PIN_FUNC_8
 #elif    (RTE_USART6_RX_ID == 3)
   #define RTE_USART6_RX                 1
   #define RTE_USART6_RX_PORT            GPIO_PORT_G
   #define RTE_USART6_RX_PIN             GPIO_PIN_9
-  #define RTE_USART6_RX_FUNC            GPIO_PIN_FUNC_7
+  #define RTE_USART6_RX_FUNC            GPIO_PIN_FUNC_8
 #else
   #error "Invalid USART6_RX Pin Configuration!"
 #endif
@@ -694,12 +702,12 @@
   #define RTE_USART6_CK                 1
   #define RTE_USART6_CK_PORT            GPIO_PORT_C
   #define RTE_USART6_CK_PIN             GPIO_PIN_8
-  #define RTE_USART6_CK_FUNC            GPIO_PIN_FUNC_7
+  #define RTE_USART6_CK_FUNC            GPIO_PIN_FUNC_8
 #elif    (RTE_USART6_CK_ID == 2)
   #define RTE_USART6_CK                 1
   #define RTE_USART6_CK_PORT            GPIO_PORT_G
   #define RTE_USART6_CK_PIN             GPIO_PIN_7
-  #define RTE_USART6_CK_FUNC            GPIO_PIN_FUNC_7
+  #define RTE_USART6_CK_FUNC            GPIO_PIN_FUNC_8
 #else
   #error "Invalid USART6_CK Pin Configuration!"
 #endif
@@ -712,12 +720,12 @@
   #define RTE_USART6_CTS                1
   #define RTE_USART6_CTS_PORT           GPIO_PORT_G
   #define RTE_USART6_CTS_PIN            GPIO_PIN_13
-  #define RTE_USART6_CTS_FUNC           GPIO_PIN_FUNC_7
+  #define RTE_USART6_CTS_FUNC           GPIO_PIN_FUNC_8
 #elif    (RTE_USART6_CTS_ID == 2)
   #define RTE_USART6_CTS                1
   #define RTE_USART6_CTS_PORT           GPIO_PORT_G
   #define RTE_USART6_CTS_PIN            GPIO_PIN_15
-  #define RTE_USART6_CTS_FUNC           GPIO_PIN_FUNC_7
+  #define RTE_USART6_CTS_FUNC           GPIO_PIN_FUNC_8
 #else
   #error "Invalid USART6_CTS Pin Configuration!"
 #endif
@@ -730,12 +738,12 @@
   #define RTE_USART6_RTS                1
   #define RTE_USART6_RTS_PORT           GPIO_PORT_G
   #define RTE_USART6_RTS_PIN            GPIO_PIN_8
-  #define RTE_USART6_RTS_FUNC           GPIO_PIN_FUNC_7
+  #define RTE_USART6_RTS_FUNC           GPIO_PIN_FUNC_8
 #elif    (RTE_USART6_RTS_ID == 2)
   #define RTE_USART6_RTS                1
   #define RTE_USART6_RTS_PORT           GPIO_PORT_G
   #define RTE_USART6_RTS_PIN            GPIO_PIN_12
-  #define RTE_USART6_RTS_FUNC           GPIO_PIN_FUNC_7
+  #define RTE_USART6_RTS_FUNC           GPIO_PIN_FUNC_8
 #else
   #error "Invalid USART6_RTS Pin Configuration!"
 #endif
@@ -786,22 +794,22 @@
   #define RTE_UART7_TX                  1
   #define RTE_UART7_TX_PORT             GPIO_PORT_F
   #define RTE_UART7_TX_PIN              GPIO_PIN_7
-  #define RTE_UART7_TX_FUNC             GPIO_PIN_FUNC_7
+  #define RTE_UART7_TX_FUNC             GPIO_PIN_FUNC_8
 #elif    (RTE_UART7_TX_ID == 2)
   #define RTE_UART7_TX                  1
   #define RTE_UART7_TX_PORT             GPIO_PORT_E
   #define RTE_UART7_TX_PIN              GPIO_PIN_8
-  #define RTE_UART7_TX_FUNC             GPIO_PIN_FUNC_7
+  #define RTE_UART7_TX_FUNC             GPIO_PIN_FUNC_8
 #elif    (RTE_UART7_TX_ID == 3)
   #define RTE_UART7_TX                  1
   #define RTE_UART7_TX_PORT             GPIO_PORT_A
   #define RTE_UART7_TX_PIN              GPIO_PIN_15
-  #define RTE_UART7_TX_FUNC             GPIO_PIN_FUNC_7
+  #define RTE_UART7_TX_FUNC             GPIO_PIN_FUNC_8
 #elif    (RTE_UART7_TX_ID == 4)
   #define RTE_UART7_TX                  1
   #define RTE_UART7_TX_PORT             GPIO_PORT_B
   #define RTE_UART7_TX_PIN              GPIO_PIN_4
-  #define RTE_UART7_TX_FUNC             GPIO_PIN_FUNC_7
+  #define RTE_UART7_TX_FUNC             GPIO_PIN_FUNC_8
 #else
   #error "Invalid UART7_TX Pin Configuration!"
 #endif
@@ -814,22 +822,22 @@
   #define RTE_UART7_RX                  1
   #define RTE_UART7_RX_PORT             GPIO_PORT_F
   #define RTE_UART7_RX_PIN              GPIO_PIN_6
-  #define RTE_UART7_RX_FUNC             GPIO_PIN_FUNC_7
+  #define RTE_UART7_RX_FUNC             GPIO_PIN_FUNC_8
 #elif    (RTE_UART7_RX_ID == 2)
   #define RTE_UART7_RX                  1
   #define RTE_UART7_RX_PORT             GPIO_PORT_E
   #define RTE_UART7_RX_PIN              GPIO_PIN_7
-  #define RTE_UART7_RX_FUNC             GPIO_PIN_FUNC_7
+  #define RTE_UART7_RX_FUNC             GPIO_PIN_FUNC_8
 #elif    (RTE_UART7_RX_ID == 3)
   #define RTE_UART7_RX                  1
   #define RTE_UART7_RX_PORT             GPIO_PORT_A
   #define RTE_UART7_RX_PIN              GPIO_PIN_8
-  #define RTE_UART7_RX_FUNC             GPIO_PIN_FUNC_7
+  #define RTE_UART7_RX_FUNC             GPIO_PIN_FUNC_8
 #elif    (RTE_UART7_RX_ID == 4)
   #define RTE_UART7_RX                  1
   #define RTE_UART7_RX_PORT             GPIO_PORT_B
   #define RTE_UART7_RX_PIN              GPIO_PIN_3
-  #define RTE_UART7_RX_FUNC             GPIO_PIN_FUNC_7
+  #define RTE_UART7_RX_FUNC             GPIO_PIN_FUNC_8
 #else
   #error "Invalid UART7_RX Pin Configuration!"
 #endif
@@ -880,12 +888,12 @@
   #define RTE_UART8_TX                  1
   #define RTE_UART8_TX_PORT             GPIO_PORT_E
   #define RTE_UART8_TX_PIN              GPIO_PIN_1
-  #define RTE_UART8_TX_FUNC             GPIO_PIN_FUNC_7
+  #define RTE_UART8_TX_FUNC             GPIO_PIN_FUNC_8
 #elif    (RTE_UART8_TX_ID == 2)
   #define RTE_UART8_TX                  1
   #define RTE_UART8_TX_PORT             GPIO_PORT_F
   #define RTE_UART8_TX_PIN              GPIO_PIN_9
-  #define RTE_UART8_TX_FUNC             GPIO_PIN_FUNC_7
+  #define RTE_UART8_TX_FUNC             GPIO_PIN_FUNC_8
 #else
   #error "Invalid UART8_TX Pin Configuration!"
 #endif
@@ -898,12 +906,12 @@
   #define RTE_UART8_RX                  1
   #define RTE_UART8_RX_PORT             GPIO_PORT_E
   #define RTE_UART8_RX_PIN              GPIO_PIN_0
-  #define RTE_UART8_RX_FUNC             GPIO_PIN_FUNC_7
+  #define RTE_UART8_RX_FUNC             GPIO_PIN_FUNC_8
 #elif    (RTE_UART8_RX_ID == 2)
   #define RTE_UART8_RX                  1
   #define RTE_UART8_RX_PORT             GPIO_PORT_F
   #define RTE_UART8_RX_PIN              GPIO_PIN_8
-  #define RTE_UART8_RX_FUNC             GPIO_PIN_FUNC_7
+  #define RTE_UART8_RX_FUNC             GPIO_PIN_FUNC_8
 #else
   #error "Invalid UART8_RX Pin Configuration!"
 #endif
@@ -954,12 +962,12 @@
   #define RTE_UART9_TX                  1
   #define RTE_UART9_TX_PORT             GPIO_PORT_D
   #define RTE_UART9_TX_PIN              GPIO_PIN_15
-  #define RTE_UART9_TX_FUNC             GPIO_PIN_FUNC_7
+  #define RTE_UART9_TX_FUNC             GPIO_PIN_FUNC_11
 #elif    (RTE_UART9_TX_ID == 2)
   #define RTE_UART9_TX                  1
   #define RTE_UART9_TX_PORT             GPIO_PORT_G
   #define RTE_UART9_TX_PIN              GPIO_PIN_1
-  #define RTE_UART9_TX_FUNC             GPIO_PIN_FUNC_7
+  #define RTE_UART9_TX_FUNC             GPIO_PIN_FUNC_11
 #else
   #error "Invalid UART9_TX Pin Configuration!"
 #endif
@@ -972,12 +980,12 @@
   #define RTE_UART9_RX                  1
   #define RTE_UART9_RX_PORT             GPIO_PORT_D
   #define RTE_UART9_RX_PIN              GPIO_PIN_14
-  #define RTE_UART9_RX_FUNC             GPIO_PIN_FUNC_7
+  #define RTE_UART9_RX_FUNC             GPIO_PIN_FUNC_11
 #elif    (RTE_UART9_RX_ID == 2)
   #define RTE_UART9_RX                  1
   #define RTE_UART9_RX_PORT             GPIO_PORT_G
   #define RTE_UART9_RX_PIN              GPIO_PIN_0
-  #define RTE_UART9_RX_FUNC             GPIO_PIN_FUNC_7
+  #define RTE_UART9_RX_FUNC             GPIO_PIN_FUNC_11
 #else
   #error "Invalid UART9_RX Pin Configuration!"
 #endif
@@ -1028,12 +1036,12 @@
   #define RTE_UART10_TX                 1
   #define RTE_UART10_TX_PORT            GPIO_PORT_E
   #define RTE_UART10_TX_PIN             GPIO_PIN_3
-  #define RTE_UART10_TX_FUNC            GPIO_PIN_FUNC_7
+  #define RTE_UART10_TX_FUNC            GPIO_PIN_FUNC_11
 #elif    (RTE_UART10_TX_ID == 2)
   #define RTE_UART10_TX                 1
   #define RTE_UART10_TX_PORT            GPIO_PORT_G
   #define RTE_UART10_TX_PIN             GPIO_PIN_12
-  #define RTE_UART10_TX_FUNC            GPIO_PIN_FUNC_7
+  #define RTE_UART10_TX_FUNC            GPIO_PIN_FUNC_11
 #else
   #error "Invalid UART10_TX Pin Configuration!"
 #endif
@@ -1046,12 +1054,12 @@
   #define RTE_UART10_RX                 1
   #define RTE_UART10_RX_PORT            GPIO_PORT_E
   #define RTE_UART10_RX_PIN             GPIO_PIN_2
-  #define RTE_UART10_RX_FUNC            GPIO_PIN_FUNC_7
+  #define RTE_UART10_RX_FUNC            GPIO_PIN_FUNC_11
 #elif    (RTE_UART10_RX_ID == 2)
   #define RTE_UART10_RX                 1
   #define RTE_UART10_RX_PORT            GPIO_PORT_G
   #define RTE_UART10_RX_PIN             GPIO_PIN_11
-  #define RTE_UART10_RX_FUNC            GPIO_PIN_FUNC_7
+  #define RTE_UART10_RX_FUNC            GPIO_PIN_FUNC_11
 #else
   #error "Invalid UART10_RX Pin Configuration!"
 #endif
