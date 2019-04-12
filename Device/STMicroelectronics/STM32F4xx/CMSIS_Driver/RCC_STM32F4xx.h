@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Sergey Koshkin <koshkin.sergey@gmail.com>
+ * Copyright (C) 2018-2019 Sergey Koshkin <koshkin.sergey@gmail.com>
  * All rights reserved
  *
  * Licensed under the Apache License, Version 2.0 (the License); you may
@@ -154,15 +154,23 @@ typedef enum {
     defined(STM32F439xx) || defined(STM32F469xx) || defined(STM32F479xx)
   RCC_PERIPH_DMA2D = (int32_t)(RCC_AHB1ENR_DMA2DEN | RCC_PERIPH_AHB1_MASK),
 #endif
+#if defined(STM32F407xx) || defined(STM32F417xx) ||                                                 \
+    defined(STM32F427xx) || defined(STM32F429xx) || defined(STM32F437xx) ||                         \
+    defined(STM32F439xx) || defined(STM32F469xx) || defined(STM32F479xx)
   RCC_PERIPH_ETHMAC = (int32_t)(RCC_AHB1ENR_ETHMACEN | RCC_PERIPH_AHB1_MASK),
   RCC_PERIPH_ETHMACTX = (int32_t)(RCC_AHB1ENR_ETHMACTXEN | RCC_PERIPH_AHB1_MASK),
   RCC_PERIPH_ETHMACRX = (int32_t)(RCC_AHB1ENR_ETHMACRXEN | RCC_PERIPH_AHB1_MASK),
   RCC_PERIPH_ETHMACPTP = (int32_t)(RCC_AHB1ENR_ETHMACPTPEN | RCC_PERIPH_AHB1_MASK),
+#endif
   RCC_PERIPH_OTGHS = (int32_t)(RCC_AHB1ENR_OTGHSEN | RCC_PERIPH_AHB1_MASK),
   RCC_PERIPH_OTGHSULPI = (int32_t)(RCC_AHB1ENR_OTGHSULPIEN | RCC_PERIPH_AHB1_MASK),
 
   /* AHB2 */
+#if defined(STM32F407xx) || defined(STM32F417xx) ||                                                 \
+    defined(STM32F427xx) || defined(STM32F429xx) || defined(STM32F437xx) ||                         \
+    defined(STM32F439xx) || defined(STM32F446xx) || defined(STM32F469xx) || defined(STM32F479xx)
   RCC_PERIPH_DCMI = (int32_t)(RCC_AHB2ENR_DCMIEN | RCC_PERIPH_AHB2_MASK),
+#endif
 #if defined(STM32F415xx) || defined(STM32F417xx) || defined(STM32F437xx) ||                         \
     defined(STM32F439xx) || defined(STM32F479xx)
   RCC_PERIPH_CRYP = (int32_t)(RCC_AHB2ENR_CRYPEN | RCC_PERIPH_AHB2_MASK),

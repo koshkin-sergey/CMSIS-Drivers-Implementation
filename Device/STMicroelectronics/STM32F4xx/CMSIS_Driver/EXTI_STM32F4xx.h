@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Sergey Koshkin <koshkin.sergey@gmail.com>
+ * Copyright (C) 2018-2019 Sergey Koshkin <koshkin.sergey@gmail.com>
  * All rights reserved
  *
  * Licensed under the Apache License, Version 2.0 (the License); you may
@@ -56,9 +56,25 @@ typedef enum {
   EXTI_LINE_15            = 15,
   EXTI_PVD                = 16,
   EXTI_RTC_ALARM          = 17,
+#if defined(STM32F401xC) || defined(STM32F401xE) ||                                                 \
+    defined(STM32F405xx) || defined(STM32F415xx) || defined(STM32F407xx) || defined(STM32F417xx) || \
+    defined(STM32F411xE) ||                                                                         \
+    defined(STM32F412Cx) || defined(STM32F412Rx) || defined(STM32F412Vx) || defined(STM32F412Zx) || \
+    defined(STM32F413xx) ||                                                                         \
+    defined(STM32F423xx) || defined(STM32F427xx) || defined(STM32F429xx) || defined(STM32F437xx) || \
+    defined(STM32F439xx) || defined(STM32F446xx) || defined(STM32F469xx) || defined(STM32F479xx)
   EXTI_USB_OTG_FS_WAKEUP  = 18,
+#endif
+#if defined(STM32F407xx) || defined(STM32F417xx) ||                                                 \
+    defined(STM32F427xx) || defined(STM32F429xx) || defined(STM32F437xx) ||                         \
+    defined(STM32F439xx) || defined(STM32F469xx) || defined(STM32F479xx)
   EXTI_ETHERNET_WAKEUP    = 19,
+#endif
+#if defined(STM32F405xx) || defined(STM32F415xx) || defined(STM32F407xx) || defined(STM32F417xx) || \
+    defined(STM32F427xx) || defined(STM32F429xx) || defined(STM32F437xx) ||                         \
+    defined(STM32F439xx) || defined(STM32F446xx) || defined(STM32F469xx) || defined(STM32F479xx)
   EXTI_USB_OTG_HS_WAKEUP  = 20,
+#endif
   EXTI_RTC_TAMPER_STAMP   = 21,
   EXTI_RTC_WAKEUP         = 22,
   EXTI_LINE_NUMBER
